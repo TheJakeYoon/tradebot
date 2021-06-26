@@ -144,7 +144,7 @@ def get_tickers_polygon():
         url = "https://api.polygon.io/v3/reference/tickers?active=true&sort=ticker&order=asc&limit=1000&apiKey=" + profile.POLYGON_API_KEY
         response = requests.get(url).json()
         while 'next_url' in response:
-            print(response['next_url'])
+            #print(response['next_url'])
             for ticker in response['results']:
                 if 'primary_exchange' in ticker and 'locale' in ticker and '.' not in ticker['ticker'] and len(ticker['ticker']) < 5:
                     csvwriter.writerow([ticker['ticker'], ticker['name'], ticker['locale'], ticker['primary_exchange']])
@@ -167,7 +167,7 @@ def get_less_tickers_polygon():
     df = df[~df['name'].str.contains('ETF')]
     df.reset_index(drop = True, inplace = True)
     print(df.info())
-    print(df)
+    #print(df)
 
     df.to_csv('./data/tickers/smaller_polygon_list.csv', index = False)
 
