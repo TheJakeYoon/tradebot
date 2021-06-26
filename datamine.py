@@ -138,7 +138,7 @@ def get_tickers_quandl():
 def get_tickers_polygon():
     tickers = []
 
-    with open('polygon_list.csv', 'w') as csvfile:
+    with open('./data/tickers/polygon_list.csv', 'w') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(['ticker', 'name', 'locale', 'exchange'])
         url = "https://api.polygon.io/v3/reference/tickers?active=true&sort=ticker&order=asc&limit=1000&apiKey=" + profile.POLYGON_API_KEY
