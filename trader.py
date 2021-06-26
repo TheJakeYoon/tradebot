@@ -7,7 +7,7 @@ import gap, profile, datamine, telegram_bot, performance
 if __name__ == '__main__':
 
     #Prevents the computer from sleeping
-    caffeine.on()
+    #caffeine.on()
 
     # First, open the API connection
     api = tradeapi.REST(
