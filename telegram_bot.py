@@ -6,12 +6,12 @@ import alpaca_trade_api as tradeapi
 
 
 def start(update: Update, context: CallbackContext):
-    update.message.reply_text(str(update.message.chat_id))
+    update.message.reply_text("Hi! I'm V.I.R.O! Chat ID is " + str(update.message.chat_id))
 
 def send_message(text):
     url = "https://api.telegram.org/bot{}/sendMessage?chat_id={}&parse_mode=Markdown&text={}".format(profile.TELEGRAM_API_KEY, profile.TELEGRAM_CHAT_ID, text)
     response = requests.get(url).json()
-    print(response)
+    #print(response)
 
 def status(update: Update, context: CallbackContext):
     user = update.effective_user
@@ -71,5 +71,4 @@ def main():
     updater.idle()
 
 if __name__ == '__main__':
-    pass
-    #main()
+    main()

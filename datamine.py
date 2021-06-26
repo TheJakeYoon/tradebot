@@ -22,10 +22,13 @@ async def get_APIdata(session, url, datas):
             }
             datas.append(data)
         except Exception as e:
-            print(e)
+            pass
+            #print(e)
 
-async def scan():
+async def scan(date):
     df = pd.read_csv('./data/tickers/polygon_list.csv')
+
+    errors = []
 
     tickers = df['ticker'].tolist()
 
@@ -34,7 +37,6 @@ async def scan():
     async with aiohttp.ClientSession() as session:
         tasks = []
         for ticker in tickers:
-            date = market_day.prev_open2()
             url = "https://api.polygon.io/v1/open-close/{}/{}?unadjusted=true&apiKey={}".format(ticker, date, profile.POLYGON_API_KEY)
             task = asyncio.ensure_future(get_APIdata(session, url, datas))
             tasks.append(task)
@@ -136,7 +138,7 @@ def get_tickers_quandl():
 def get_tickers_polygon():
     tickers = []
 
-    with open('polygon_list.csv', 'w') as csvfile:
+    with open('smaller_polygon_list.csv', 'w') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(['ticker', 'name', 'locale', 'exchange'])
         url = "https://api.polygon.io/v3/reference/tickers?active=true&sort=ticker&order=asc&limit=1000&apiKey=" + profile.POLYGON_API_KEY
@@ -165,11 +167,11 @@ def get_less_tickers_polygon():
     print(df.info())
     print(df)
 
-    df.to_csv('./data/tickers/smaller_polygon_list.csv', index = False)
+    df.to_csv('./data/tickers/polygon_list.csv', index = False)
 
-def get_open_close():
+def get_open_close(date = market_day.prev_open()):
     print("Getting Daily Open Close")
-    datas = asyncio.run(scan())
+    datas = asyncio.run(scan(date))
     for data in datas:
         with open('./data/historical/polygon_daily/{}.csv'.format(data['ticker']), 'a') as csvfile:
             csvwriter = csv.writer(csvfile)
@@ -177,6 +179,6 @@ def get_open_close():
     
 if __name__ == '__main__':
     print("Let's get some data!")
-    
+
     #run this if trader.py was not terminated correctly.
     get_open_close()

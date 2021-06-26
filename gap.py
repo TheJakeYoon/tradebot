@@ -10,9 +10,6 @@ import profile, market_day
 from os import listdir
 from os.path import isfile, join
 
-def init(api):
-    print("Strategy initialized")
-
 # asyncio method to get polyon data faster
 async def get_APIdata(session, url, close_price, gap):
     async with session.get(url) as response:
@@ -50,10 +47,10 @@ async def get_gap():
             #print(file)
             pass
         try:
-            volume = df.loc[df['date'] == market_day.prev_open2()]['volume'].iloc[-1]
+            volume = df.loc[df['date'] == market_day.prev_open()]['volume'].iloc[-1]
             # only scans for stocks with higher than daily volume of 1 million.
             if volume > 1000000:
-                close_price = df.loc[df['date'] == market_day.prev_open2()]['close'].iloc[-1]
+                close_price = df.loc[df['date'] == market_day.prev_open()]['close'].iloc[-1]
                 ticker = file.replace('./data/historical/polygon_daily/', '')
                 ticker = ticker.replace('.csv', '')
                 datas.append({'ticker' : ticker, 'close_price' : close_price})
@@ -108,7 +105,7 @@ def scan(api):
     count = 0
 
     for i in range(len(tickers)):
-        date = market_day.prev_open2()
+        date = market_day.prev_open()
         # check for news
         url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(tickers[i]['ticker'], date, profile.POLYGON_API_KEY)
         response = requests.get(url).json()

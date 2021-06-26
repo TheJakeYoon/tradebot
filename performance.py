@@ -10,12 +10,12 @@ def summary(api):
     # Check if our account is restricted from trading.
     if account.trading_blocked:
         print('Account is currently restricted from trading.')
-    print('Equity       : ${}'.format(round(float(account.equity), 2)))
-    print('Buying Power : ${}'.format(round(float(account.buying_power), 2)))
+    # print('Equity       : ${}'.format(round(float(account.equity), 2)))
+    # print('Buying Power : ${}'.format(round(float(account.buying_power), 2)))
 
-    #Get Profit/Loss
-    balance_change = float(account.equity) - float(account.last_equity)
-    print(f'Today\'s P/L: ${round(balance_change, 2)}')
+    # #Get Profit/Loss
+    # balance_change = float(account.equity) - float(account.last_equity)
+    # print(f'Today\'s P/L: ${round(balance_change, 2)}')
 
     #Today's Equity Change
     today = datetime.today().strftime("%Y-%m-%d")
@@ -41,3 +41,24 @@ def summary(api):
         csvwriter = csv.writer(csvfile)
         for trade in trades:
             csvwriter.writerow([trade.symbol, trade.side, trade.qty, trade.price])
+
+def today(api):
+    account = api.get_account()
+
+    print('Buying Power : ${}'.format(round(float(account.buying_power), 2)))
+
+    telegram_bot.send_message("Equity is {}".format(round(float(account.equity), 2)))
+    #Get Profit/Loss
+    balance_change = float(account.equity) - float(account.last_equity)
+    balance_change = round(balance_change, 2)
+
+    pct = round((balance_change / float(account.last_equity)) * 100, 2)
+
+    if balance_change > 0:
+        telegram_bot.send_message("You made {} today! Nice!".format(balance_change))
+        telegram_bot.send_message("That's {}% profit! Nice!".format(pct))
+    elif balance_change == 0:
+        telegram_bot.send_message("You didn't make any money today...")
+    else:
+        telegram_bot.send_message("You lost {} today... Sorry...".format(balance_change))
+        telegram_bot.send_message("That's {}% loss...".format(pct))
