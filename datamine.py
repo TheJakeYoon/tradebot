@@ -150,6 +150,8 @@ def get_tickers_polygon():
                     csvwriter.writerow([ticker['ticker'], ticker['name'], ticker['locale'], ticker['primary_exchange']])
             response = requests.get(response['next_url'] + "&apiKey=" + profile.POLYGON_API_KEY).json()
 
+    df = pd.DataFrame({"ticker" : tickers})
+    df.to_csv("./data/tickers/polygon_list.csv", index = False)
     return tickers
 
 def get_less_tickers_polygon():
@@ -167,7 +169,7 @@ def get_less_tickers_polygon():
     print(df.info())
     print(df)
 
-    df.to_csv('./data/tickers/polygon_list.csv', index = False)
+    df.to_csv('./data/tickers/smaller_polygon_list.csv', index = False)
 
 def get_open_close(date = market_day.prev_open()):
     print("Getting Daily Open Close")
