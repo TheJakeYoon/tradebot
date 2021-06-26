@@ -5,7 +5,7 @@ from alpaca_trade_api import Stream
 from datetime import date
 from datetime import timedelta
 import pandas as pd
-import caffeine, time, datetime, requests, threading, math, asyncio, aiohttp, csv
+import time, datetime, requests, threading, math, asyncio, aiohttp, csv
 import profile, market_day
 from os import listdir
 from os.path import isfile, join

@@ -1,6 +1,6 @@
 import alpaca_trade_api as tradeapi
 from datetime import date, datetime
-import time, caffeine, csv, pytz
+import time, csv, pytz
 import gap, profile, datamine, telegram_bot, performance
 
 #TRADE BOT
