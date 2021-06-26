@@ -138,7 +138,7 @@ def get_tickers_quandl():
 def get_tickers_polygon():
     tickers = []
 
-    with open('smaller_polygon_list.csv', 'w') as csvfile:
+    with open('polygon_list.csv', 'w') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(['ticker', 'name', 'locale', 'exchange'])
         url = "https://api.polygon.io/v3/reference/tickers?active=true&sort=ticker&order=asc&limit=1000&apiKey=" + profile.POLYGON_API_KEY
@@ -149,9 +149,6 @@ def get_tickers_polygon():
                 if 'primary_exchange' in ticker and 'locale' in ticker and '.' not in ticker['ticker'] and len(ticker['ticker']) < 5:
                     csvwriter.writerow([ticker['ticker'], ticker['name'], ticker['locale'], ticker['primary_exchange']])
             response = requests.get(response['next_url'] + "&apiKey=" + profile.POLYGON_API_KEY).json()
-
-    df = pd.DataFrame({"ticker" : tickers})
-    df.to_csv("./data/tickers/polygon_list.csv", index = False)
     return tickers
 
 def get_less_tickers_polygon():
