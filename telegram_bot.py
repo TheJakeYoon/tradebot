@@ -30,7 +30,7 @@ def status(update: Update, context: CallbackContext):
         positions = api.list_positions()
         if positions is not None:
             for position in positions:
-                update.message.reply_text("{} P/L: {}   {}% Current Price: {} Entry Price: {}".format(position.symbol, round(float(position.unrealized_pl, 2)), round(float(position.unrealized_plpc) * 100, 2), position.current_price, round(float(position.avg_entry_price), 2)))
+                update.message.reply_text("{} P/L: {}   {}% Current Price: {} Entry Price: {}".format(position.symbol, round(float(position.unrealized_pl), 2), round(float(position.unrealized_plpc) * 100, 2), position.current_price, round(float(position.avg_entry_price), 2)))
         else:
             update.message.reply_text("No Positions!")
 
