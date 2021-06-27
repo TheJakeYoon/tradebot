@@ -1,12 +1,12 @@
 import alpaca_trade_api as tradeapi
-from datetime import date, datetime
-import time, csv, pytz
-import gap, profile, datamine, telegram_bot, performance
+from datetime import datetime
+import time, pytz
+import gap, profile, market_day, datamine, telegram_bot, performance
 
 #TRADE BOT
 if __name__ == '__main__':
 
-    #Prevents the computer from sleeping
+    #Prevents the computer from sleeping MAC ONLY!
     #caffeine.on()
 
     # First, open the API connection
@@ -18,65 +18,65 @@ if __name__ == '__main__':
 
     # run forever!
     while True:
-        est = pytz.timezone('America/New_York')
-        market_time = datetime.now(est).strftime("%H:%M")
-        print(market_time)
+        print("Trading Bot Started!")
+        print(market_day.now())
+        prev_closes = gap.get_close()
 
         if api.get_clock().is_open:
             print("Market Open!")
-            print(datetime.now(est).strftime("%H:%M"))
+            print(market_day.now())
         else:
             print("Market Closed")
-            print(datetime.now(est).strftime("%H:%M"))
+            print(market_day.now())
 
+        market_time = market_day.now()
         while not market_time == "09:30":
-            market_time = datetime.now(est).strftime("%H:%M")
+            market_time = market_day.now()
             #print(market_time)
 
-        print("Scanning for stocks")
-        tickers = gap.scan(api)
+        if api.get_clock().is_open:
+            print("Scanning for stocks")
+            tickers = gap.scan(api, prev_closes)
 
-        print("Ordering now")
-        gap.order(api, tickers)
+            print("Ordering now")
+            gap.order(api, tickers)
 
-        print("Order finished Done!")
+            print("Order finished Done!")
 
-        telegram_bot.send_message("Order Finished")
+            telegram_bot.send_message("Order Finished")
 
-        time.sleep(10)
-
-        #Place stop limit and take profit order
-        gap.over_v2(api)
-
-        while api.get_clock().is_open or api.list_positions() is not None:
             time.sleep(10)
-            est = pytz.timezone('America/New_York')
-            market_time = datetime.now(est).strftime("%H:%M")
-            if market_time == "12:00":
-                #Strategy specific!!!!!!
-                gap.close(api)
 
-        print("All positions closed now")
-        telegram_bot.send_message("All positions closed now!")
+            #Place stop limit and take profit order
+            gap.over_v2(api)
 
-        #Saves daily performance        
-        performance.summary(api)
+            while api.get_clock().is_open or api.list_positions() is not None:
+                time.sleep(10)
+                market_time = market_day.now()
+                if market_time == "12:00":
+                    #Strategy specific!!!!!!
+                    gap.close(api)
 
-        #Including after hour trading
-        market_closed = False
+            print("All positions closed now")
+            telegram_bot.send_message("All positions closed now!")
 
-        #Wait until market completely closed
-        print("Waiting for after hour to close")
-        while not market_closed:
-            time.sleep(10)
-            est = pytz.timezone('America/New_York')
-            market_time = datetime.now(est).strftime("%H:%M")
-            if market_time == "20:05":
-                market_closed = True
+            #Saves daily performance        
+            performance.summary(api)
+
+            #Including after hour trading
+            market_closed = False
+
+            #Wait until market completely closed
+            print("Waiting for after hour to close")
+            while not market_closed:
+                time.sleep(10)
+                market_time = market_day.now()
+                if market_time == "20:05":
+                    market_closed = True
 
 
-        #get daily open close from Polygon.io
-        datamine.get_open_close()
-        telegram_bot.send_message("Stored daily open/close from Polyon.io")
+            #get daily open close from Polygon.io
+            datamine.get_open_close()
+            telegram_bot.send_message("Stored daily open/close from Polyon.io")
 
-        performance.today(api)
+            performance.today(api)

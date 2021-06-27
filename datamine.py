@@ -1,4 +1,4 @@
-import csv, quandl, yfinance, test, requests, asyncio, aiohttp
+import csv, quandl, yfinance, requests, asyncio, aiohttp
 import profile, market_day
 import alpaca_trade_api as tradeapi
 from alpaca_trade_api import REST
@@ -113,7 +113,7 @@ def get_all_stocks():
     assets = api.list_assets(status='active')
     count = 0
     ticker = ['ticker']
-    with open('assets_list.csv', mode='w') as csvfile:
+    with open('./data/tickers/assets_list.csv', mode='w') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(ticker)
         for asset in assets:
@@ -121,7 +121,7 @@ def get_all_stocks():
                 count += 1
                 ticker = [asset.symbol]
                 csvwriter.writerow(ticker)
-        print(count)
+        print("{} stocks stored in assets_list.csv".format(count))
 
 def get_tickers_quandl():
     with open('./data/tickers/quandl.csv', 'w') as csvfile:
