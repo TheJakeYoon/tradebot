@@ -1,6 +1,5 @@
 import alpaca_trade_api as tradeapi
-from datetime import datetime
-import time, pytz
+import time
 import gap, profile, market_day, datamine, telegram_bot, performance
 
 #TRADE BOT
@@ -35,6 +34,9 @@ if __name__ == '__main__':
             #print(market_time)
 
         if api.get_clock().is_open:
+            print("Closing all positions")
+            gap.close(api)
+
             print("Scanning for stocks")
             tickers = gap.scan(api, prev_closes)
 
@@ -48,14 +50,15 @@ if __name__ == '__main__':
             time.sleep(10)
 
             #Place stop limit and take profit order
-            gap.over_v2(api)
+            # gap.over_v2(api)
 
             while api.get_clock().is_open or api.list_positions() is not None:
                 time.sleep(10)
                 market_time = market_day.now()
                 if market_time == "12:00":
+                    pass
                     #Strategy specific!!!!!!
-                    gap.close(api)
+                    # gap.close(api)
 
             print("All positions closed now")
             telegram_bot.send_message("All positions closed now!")
