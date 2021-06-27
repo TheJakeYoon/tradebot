@@ -1,7 +1,7 @@
 import profile
 import requests
-from telegram import Update, ForceReply
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram import Update
+from telegram.ext import Updater, CommandHandler, CallbackContext
 import alpaca_trade_api as tradeapi
 
 
@@ -65,8 +65,6 @@ def main():
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(CommandHandler("status", status))
     dispatcher.add_handler(CommandHandler("close", close))
-
-    #dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
 
     updater.start_polling()
 
