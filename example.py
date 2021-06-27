@@ -2,7 +2,7 @@ import alpaca_trade_api as tradeapi
 from alpaca_trade_api import REST
 from alpaca_trade_api.rest import TimeFrame
 from alpaca_trade_api import Stream
-import profile, pandas
+import profile, pandas, time
 import matplotlib.pyplot as plt
 from datetime import date
 from datetime import timedelta
@@ -253,7 +253,7 @@ def order(api):
         print("Update for {}. Event: {}.".format(client_order_id, data['event']))
 
     # Start listening for updates.
-    onn.run(['trade_updates'])
+    conn.run(['trade_updates'])
 
 #TA_Lib
 
@@ -332,7 +332,4 @@ if __name__ == '__main__':
         profile.APCA_API_SECRET_KEY,
         profile.APCA_API_BASE_URL
     )
-    date = date.today() - timedelta(days = 4)
-    date = date.strftime("%Y-%m-%d")
-    data = api.get_bars("AAPL", TimeFrame.Hour, date, date, limit = 10000, adjustment='raw')
-    print(data.df)
+    plot_pair(api)
