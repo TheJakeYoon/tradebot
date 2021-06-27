@@ -6,8 +6,7 @@ import alpaca_trade_api as tradeapi
 
 
 def start(update: Update, context: CallbackContext):
-    if update.message.chat.id == profile.TELEGRAM_CHAT_ID:
-        update.message.reply_text("Hi! I'm V.I.R.O! Chat ID is " + str(update.message.chat_id))
+    update.message.reply_text("Hi! I'm V.I.R.O! Chat ID is " + str(update.message.chat_id))
 
 def send_message(text):
     url = "https://api.telegram.org/bot{}/sendMessage?chat_id={}&parse_mode=Markdown&text={}".format(profile.TELEGRAM_API_KEY, profile.TELEGRAM_CHAT_ID, text)
@@ -15,7 +14,7 @@ def send_message(text):
     #print(response)
 
 def status(update: Update, context: CallbackContext):
-    if update.message.chat.id == profile.TELEGRAM_CHAT_ID:
+    if update.message.chat_id == profile.TELEGRAM_CHAT_ID:
         user = update.effective_user
         update.message.reply_text("I'm checking with your broker!")
 
@@ -42,7 +41,7 @@ def status(update: Update, context: CallbackContext):
 
 
 def close(update: Update, context: CallbackContext):
-    if update.message.chat.id == profile.TELEGRAM_CHAT_ID:
+    if update.message.chat_id == profile.TELEGRAM_CHAT_ID:
         update.message.reply_text("Closing all positions")
         api = tradeapi.REST(
             profile.APCA_API_KEY_ID,
