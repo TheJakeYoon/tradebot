@@ -18,6 +18,7 @@ print(datetime.now() - start)
 start = datetime.now()
 
 tickers = gap.scan(api, prev_closes)
+print(tickers)
 
 # get runtime
 print(datetime.now() - start)
