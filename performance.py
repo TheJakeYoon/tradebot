@@ -15,10 +15,24 @@ def summary(api):
     # balance_change = float(account.equity) - float(account.last_equity)
     # print(f'Today\'s P/L: ${round(balance_change, 2)}')
 
-    #Today's Equity Change
+    # Get today's hourly equity change
     today = market_day.today()
     performance = api.get_portfolio_history(period = "1D", timeframe = "1H", date_end = today, extended_hours = False)
-    with open('./data/performance/alpaca.csv', 'a') as csvfile:
+    with open('./data/performance/alpaca_hour.csv', 'a') as csvfile:
+        csvwriter = csv.writer(csvfile)
+        # equity = round(performance.equity, 2)
+        # change = round(performance.profit_loss, 2)
+        # change_pct = round(performance.profit_loss_pct, 2)
+        for i in range(len(performance.equity)):
+            time = market_day.timestamp_to_est(performance.timestamp[i])
+            equity = round(float(performance.equity[i]))
+            pl = round(float(performance.profit_loss[i]))
+            pl_pct = round(float(performance.profit_loss_pct[i]))
+            csvwriter.writerow([time, equity, pl, pl_pct])
+
+    # Get today's minute equity change
+    performance = api.get_portfolio_history(period = "1D", timeframe = "1M", date_end = today, extended_hours = False)
+    with open('./data/performance/alpaca_minute.csv', 'a') as csvfile:
         csvwriter = csv.writer(csvfile)
         # equity = round(performance.equity, 2)
         # change = round(performance.profit_loss, 2)
