@@ -32,7 +32,7 @@ def summary(api):
             csvwriter.writerow([time, equity, pl, pl_pct])
 
     # Get today's minute equity change
-    performance = api.get_portfolio_history(period = "1D", timeframe = "1M", date_end = today, extended_hours = False)
+    performance = api.get_portfolio_history(period = "1D", timeframe = "1Min", date_end = today, extended_hours = False)
     with open('./data/performance/alpaca_minute.csv', 'a') as csvfile:
         csvwriter = csv.writer(csvfile)
         # equity = round(performance.equity, 2)
