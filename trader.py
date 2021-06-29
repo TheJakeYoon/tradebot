@@ -35,13 +35,13 @@ if __name__ == '__main__':
 
         if api.get_clock().is_open:
             print("Closing all positions")
-            gap.close(api)
+            # gap.close(api)
 
             print("Scanning for stocks")
-            tickers = gap.scan(api, prev_closes)
+            # tickers = gap.scan(api, prev_closes)
 
             print("Ordering now")
-            gap.order(api, tickers)
+            # gap.order(api, tickers)
 
             print("Order finished Done!")
 
