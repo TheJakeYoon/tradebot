@@ -29,9 +29,9 @@ if __name__ == '__main__':
             print(market_day.now())
 
         market_time = market_day.now()
-        while not market_time == "09:30":
-            market_time = market_day.now()
-            #print(market_time)
+        # while not market_time == "09:30":
+        #     market_time = market_day.now()
+        #     #print(market_time)
 
         if api.get_clock().is_open:
             print("Closing all positions")
