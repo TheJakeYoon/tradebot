@@ -29,19 +29,19 @@ if __name__ == '__main__':
             print(market_day.now())
 
         market_time = market_day.now()
-        # while not market_time == "09:30":
-        #     market_time = market_day.now()
-        #     #print(market_time)
+        while not market_time == "09:30":
+            market_time = market_day.now()
+            #print(market_time)
 
         if api.get_clock().is_open:
             print("Closing all positions")
-            # gap.close(api)
+            gap.close(api)
 
             print("Scanning for stocks")
-            # tickers = gap.scan(api, prev_closes)
+            tickers = gap.scan(api, prev_closes)
 
             print("Ordering now")
-            # gap.order(api, tickers)
+            gap.order(api, tickers)
 
             print("Order finished Done!")
 
@@ -52,7 +52,7 @@ if __name__ == '__main__':
             #Place stop limit and take profit order
             # gap.over_v2(api)
 
-            while api.list_positions() is not None and not market_time == "13:31":
+            while api.list_positions() is not None and market_time != "12:01":
                 time.sleep(10)
                 market_time = market_day.now()
                 if market_time == "12:00":
@@ -65,7 +65,7 @@ if __name__ == '__main__':
 
             #Wait until after hour closed
             print("Waiting for after hour to close")
-            while not market_time == "20:05":
+            while market_time != "20:05":
                 time.sleep(10)
                 market_time = market_day.now()
 
