@@ -123,9 +123,9 @@ def order(api, tickers):
         price = float(api.get_last_trade(ticker['ticker']).price)
         limit_price = 0.0
         if ticker['side'] == 'buy':
-            limit_price = price * 1.01
+            limit_price = price * 1.005
         elif ticker['side'] == 'sell':
-            limit_price = price * 0.99
+            limit_price = price * 0.995
         qty = math.floor((initial_cash * 0.1 ) / price)
 
         if qty > 0:
@@ -156,8 +156,8 @@ def order_v2(api):
                             type='limit',
                             time_in_force='day',
                             order_class='oco',
-                            stop_loss={'stop_price': float(position.avg_entry_price) * 1.03},
-                            take_profit={'limit_price': float(position.avg_entry_price) * 0.96}
+                            stop_loss={'stop_price': float(position.avg_entry_price) * 0.97},
+                            take_profit={'limit_price': float(position.avg_entry_price) * 1.04}
                         )
                     except Exception as e:
                         print(e)
@@ -170,8 +170,8 @@ def order_v2(api):
                             type='limit',
                             time_in_force='day',
                             order_class='oco',
-                            stop_loss={'stop_price': float(position.avg_entry_price) * 0.97},
-                            take_profit={'limit_price': float(position.avg_entry_price) * 1.04}
+                            stop_loss={'stop_price': float(position.avg_entry_price) * 1.03},
+                            take_profit={'limit_price': float(position.avg_entry_price) * 0.96}
                         )
                     except Exception as e:
                         print(e)
