@@ -52,7 +52,7 @@ if __name__ == '__main__':
             #Place stop limit and take profit order
             # gap.over_v2(api)
 
-            while api.list_positions() is not None and market_time is not "12:01":
+            while api.list_positions() is not None and not market_time == "13:31":
                 time.sleep(10)
                 market_time = market_day.now()
                 if market_time == "12:00":
@@ -63,9 +63,9 @@ if __name__ == '__main__':
             # print("All positions closed now")
             # telegram_bot.send_message("All positions closed now!")
 
-            #Wait until market completely closed
+            #Wait until after hour closed
             print("Waiting for after hour to close")
-            while market_time is not "20:05":
+            while not market_time == "20:05":
                 time.sleep(10)
                 market_time = market_day.now()
 
