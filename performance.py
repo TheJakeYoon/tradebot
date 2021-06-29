@@ -1,5 +1,6 @@
 import csv
-import telegram_bot, market_day
+import telegram_bot, market_day, profile
+import alpaca_trade_api as tradeapi
 
 # get and record last market day's performance
 def summary(api):
@@ -76,3 +77,14 @@ def today(api):
     else:
         telegram_bot.send_message("You lost {} today... Sorry...".format(balance_change))
         telegram_bot.send_message("That's {}% loss...".format(pct))
+
+if __name__ == '__main__':
+    api = tradeapi.REST(
+        profile.APCA_API_KEY_ID,
+        profile.APCA_API_SECRET_KEY,
+        profile.APCA_API_BASE_URL
+    )
+
+    #Saves daily performance        
+    summary(api)
+    today(api)
