@@ -67,15 +67,15 @@ def today(api):
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow([date, equity, balance_change, pct])
 
-    telegram_bot.send_message("Equity is {}".format(round(float(account.equity), 2)))
+    telegram_bot.send_message("Equity : ${}".format(round(float(account.equity), 2)))
 
     if balance_change > 0:
-        telegram_bot.send_message("You made {} today! Nice!".format(balance_change))
+        telegram_bot.send_message("You made ${} today! Nice!".format(balance_change))
         telegram_bot.send_message("That's {}% profit! Nice!".format(pct))
     elif balance_change == 0:
         telegram_bot.send_message("You didn't make any money today...")
     else:
-        telegram_bot.send_message("You lost {} today... Sorry...".format(balance_change))
+        telegram_bot.send_message("You lost ${} today... Sorry...".format(balance_change))
         telegram_bot.send_message("That's {}% loss...".format(pct))
 
 if __name__ == '__main__':

@@ -30,15 +30,16 @@ def status(update: Update, context: CallbackContext):
         positions = api.list_positions()
         if positions is not None:
             for position in positions:
-                update.message.reply_text("{} P/L: {}   {}% Current Price: {} Entry Price: {}".format(position.symbol, round(float(position.unrealized_pl), 2), round(float(position.unrealized_plpc) * 100, 2), position.current_price, round(float(position.avg_entry_price), 2)))
+                update.message.reply_text("{} P/L: ${}   {}% Current Price: {} Entry Price: {}".format(position.symbol, round(float(position.unrealized_pl), 2), round(float(position.unrealized_plpc) * 100, 2), position.current_price, round(float(position.avg_entry_price), 2)))
         else:
             update.message.reply_text("No Positions!")
 
-        update.message.reply_text("Current Equity: {}".format(round(float(account.equity),2)))
+        update.message.reply_text("Current Equity: ${}".format(round(float(account.equity),2)))
         pl = float(account.equity) - float(account.last_equity)
         pl_pct = round((pl / float(account.last_equity)) * 100, 2)
-        update.message.reply_text("Current P/L: {}   {}%".format(round(pl, 2), round(pl_pct, 2)))
-        update.message.reply_text("Current Cash: {}".format(round(float(account.cash), 2)))
+        update.message.reply_text("Current P/L: ${}   {}%".format(round(pl, 2), round(pl_pct, 2)))
+        update.message.reply_text("Current Cash: ${}".format(round(float(account.cash), 2)))
+        update.message.reply_text("Current Buying Power: ${}".format(round(float(account.buying_power), 2)))
 
 
 
