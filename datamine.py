@@ -169,12 +169,12 @@ def get_less_tickers_polygon():
     df.to_csv('./data/tickers/smaller_polygon_list.csv', index = False)
 
 def get_open_close(date = market_day.prev_open()):
-    print("Getting Daily Open Close")
+    print("Getting Daily Open Close {}".format(date))
     datas = asyncio.run(scan(date))
     for data in datas:
         with open('./data/historical/polygon_daily/{}.csv'.format(data['ticker']), 'a') as csvfile:
             csvwriter = csv.writer(csvfile)
-            # csvwriter.writerow(['ticker','date','open','high','low','close','volume'])
+            csvwriter.writerow(['ticker','date','open','high','low','close','volume'])
             csvwriter.writerow([data['ticker'], data['date'], data['open'], data['high'], data['low'], data['close'], data['volume']])
     
 if __name__ == '__main__':

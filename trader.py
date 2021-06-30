@@ -50,7 +50,7 @@ if __name__ == '__main__':
             time.sleep(10)
 
             #Place stop limit and take profit order
-            # gap.over_v2(api)
+            gap.over_v2(api)
 
             while api.list_positions() is not None and market_time != "12:01":
                 time.sleep(10)
@@ -58,21 +58,24 @@ if __name__ == '__main__':
                 if market_time == "12:00":
                     pass
                     #Strategy specific!!!!!!
-                    # gap.close(api)
+                    gap.close(api)
 
-            # print("All positions closed now")
-            # telegram_bot.send_message("All positions closed now!")
+            print("All positions closed now")
+            telegram_bot.send_message("All positions closed now!")
 
             #Wait until after hour closed
             print("Waiting for after hour to close")
             while market_time != "20:05":
                 time.sleep(10)
                 market_time = market_day.now()
+            #Saves daily performance        
+            performance.summary(api)
+            performance.today(api)
+
+            while market_time != "23:59":
+                time.sleep(10)
+                market_time = market_day.now()
 
             #get daily open close from Polygon.io
             datamine.get_open_close()
             telegram_bot.send_message("Stored daily open/close from Polyon.io")
-
-            #Saves daily performance        
-            performance.summary(api)
-            performance.today(api)
