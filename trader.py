@@ -34,9 +34,6 @@ if __name__ == '__main__':
             #print(market_time)
 
         if api.get_clock().is_open:
-            print("Closing all positions")
-            gap.close(api)
-
             print("Scanning for stocks")
             tickers = gap.scan(api, prev_closes)
 
