@@ -38,7 +38,7 @@ def get_close():
         try:
             df = pd.read_csv(file)
         except Exception as e:
-            #print(file)
+            # print(file)
             pass
         try:
             prev_day = market_day.prev_open()
@@ -50,7 +50,8 @@ def get_close():
                 ticker = ticker.replace('.csv', '')
                 prev_closes.append({'ticker' : ticker, 'close_price' : close_price})
         except Exception as e:
-            #print(e)
+            # print(e)
+            # print("Make sure to get previous open close")
             pass
 
     return prev_closes
@@ -117,6 +118,7 @@ def order(api, tickers):
 
     account = api.get_account()
     initial_cash = float(account.buying_power)
+    initial_cash = 30000
 
     for ticker in tickers:
 
