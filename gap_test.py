@@ -93,7 +93,7 @@ def scan(api, prev_closes):
     for i in range(len(tickers_down)):
         date = market_day.prev_open()
         # check for news
-        url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(tickers[i]['ticker'], date, profile.POLYGON_API_KEY)
+        url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(tickers_down[i]['ticker'], date, profile.POLYGON_API_KEY)
         response = requests.get(url).json()
         # only pick 10 stocks
         if not response['results'] and count < 10:
@@ -107,7 +107,7 @@ def scan(api, prev_closes):
     for i in range(len(tickers_up)):
         date = market_day.prev_open()
         # check for news
-        url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(tickers[i]['ticker'], date, profile.POLYGON_API_KEY)
+        url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(tickers_up[i]['ticker'], date, profile.POLYGON_API_KEY)
         response = requests.get(url).json()
         # only pick 10 stocks
         if not response['results'] and count < 10:
