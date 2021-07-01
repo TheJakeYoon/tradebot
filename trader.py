@@ -19,7 +19,6 @@ if __name__ == '__main__':
     while True:
         print("Trading Bot Started!")
         print(market_day.now())
-        prev_closes = gap.get_close()
 
         if api.get_clock().is_open:
             print("Market Open!")
@@ -28,10 +27,11 @@ if __name__ == '__main__':
             print("Market Closed")
             print(market_day.now())
 
-        # market_time = market_day.now()
-        # while not market_time == "09:30":
-        #     market_time = market_day.now()
-        #     #print(market_time)
+        prev_closes = gap.get_close()
+
+        market_time = market_day.now()
+        while market_time != "09:30":
+            market_time = market_day.now()
 
         if api.get_clock().is_open:
             print("Scanning for stocks")
@@ -49,13 +49,25 @@ if __name__ == '__main__':
             #Place stop limit and take profit order
             gap.order_v2(api)
 
+            time.sleep(5400)
+
+            api.cancel_all_orders()
+            time.sleep(10)
+            # place smaller profit limit order
+            gap.order_v3(api)
+
             while api.list_positions() is not None and market_time != "12:01":
                 time.sleep(10)
                 market_time = market_day.now()
                 if market_time == "12:00":
                     pass
                     #Strategy specific!!!!!!
-                    gap.close(api)
+                    gap.order_v4(api)
+
+            time.sleep(1800)
+
+            api.cancel_all_orders()
+            gap.close(api)
 
             print("All positions closed now")
             telegram_bot.send_message("All positions closed now!")

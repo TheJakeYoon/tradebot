@@ -180,6 +180,74 @@ def order_v2(api):
         else:
             print("Orders not filled yet!")
 
+# oco (One Cancels Other) stop limit and profit limit order after profit target not reached
+def order_v3(api):
+        positions = api.list_positions()
+        if positions is not None:
+            for position in positions:
+                if position.side == 'long':
+                    try:
+                        api.submit_order(
+                            symbol=position.symbol,
+                            qty=float(position.qty),
+                            side='sell',
+                            type='limit',
+                            time_in_force='day',
+                            order_class='oco',
+                            stop_loss={'stop_price': float(position.avg_entry_price) * 0.98},
+                            take_profit={'limit_price': float(position.avg_entry_price) * 1.02}
+                        )
+                    except Exception as e:
+                        print(e)
+                elif position.side == 'short':
+                    try:
+                        api.submit_order(
+                            symbol=position.symbol,
+                            qty=float(position.qty),
+                            side='buy',
+                            type='limit',
+                            time_in_force='day',
+                            order_class='oco',
+                            stop_loss={'stop_price': float(position.avg_entry_price) * 1.02},
+                            take_profit={'limit_price': float(position.avg_entry_price) * 0.98}
+                        )
+                    except Exception as e:
+                        print(e)
+        else:
+            print("Orders not filled yet!")
+
+# oco (One Cancels Other) stop limit and profit limit order after market order
+def order_v4(api):
+        positions = api.list_positions()
+        if positions is not None:
+            for position in positions:
+                if position.side == 'long':
+                    try:
+                        api.submit_order(
+                            symbol=position.symbol,
+                            qty=float(position.qty),
+                            side='sell',
+                            type='limit',
+                            time_in_force='day',
+                            limit_price=float(position.current_price) * 0.99
+                        )
+                    except Exception as e:
+                        print(e)
+                elif position.side == 'short':
+                    try:
+                        api.submit_order(
+                            symbol=position.symbol,
+                            qty=float(position.qty),
+                            side='buy',
+                            type='limit',
+                            time_in_force='day',
+                            limit_price=float(position.current_price) * 1.01
+                        )
+                    except Exception as e:
+                        print(e)
+        else:
+            print("Orders not filled yet!")
+
 # close all positions
 def close(api):
     positions = api.close_all_positions()
