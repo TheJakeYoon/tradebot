@@ -30,8 +30,8 @@ if __name__ == '__main__':
         prev_closes = gap_test.get_close()
 
         market_time = market_day.now()
-        # while market_time != "09:30":
-        #     market_time = market_day.now()
+        while market_time != "09:30":
+            market_time = market_day.now()
 
         if api.get_clock().is_open:
             print("Scanning for stocks")
