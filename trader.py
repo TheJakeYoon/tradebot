@@ -30,8 +30,8 @@ if __name__ == '__main__':
         prev_closes = gap.get_close()
 
         market_time = market_day.now()
-        # while market_time != "09:30":
-        #     market_time = market_day.now()
+        while market_time != "09:30":
+            market_time = market_day.now()
 
         if api.get_clock().is_open:
             print("Scanning for stocks")
@@ -77,9 +77,6 @@ if __name__ == '__main__':
             while market_time != "20:05":
                 time.sleep(10)
                 market_time = market_day.now()
-            #Saves daily performance        
-            performance.summary(api)
-            performance.today(api)
 
             while market_time != "23:59":
                 time.sleep(10)
@@ -88,3 +85,10 @@ if __name__ == '__main__':
             #get daily open close from Polygon.io
             datamine.get_open_close()
             telegram_bot.send_message("Stored daily open/close from Polyon.io")
+
+            #Saves daily performance
+            try:        
+                performance.summary(api)
+            except Exception as e:
+                print(e)
+            performance.today(api)

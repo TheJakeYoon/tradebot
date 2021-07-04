@@ -1,6 +1,6 @@
 import alpaca_trade_api as tradeapi
 import time
-import gap_test, profile, market_day, datamine, telegram_bot, performance
+import gap_test, profile, market_day
 
 #TRADE BOT
 if __name__ == '__main__':
@@ -28,6 +28,8 @@ if __name__ == '__main__':
             print(market_day.now())
 
         prev_closes = gap_test.get_close()
+        tickers = gap_test.scan(api, prev_closes)
+        print(tickers)
 
         market_time = market_day.now()
         while market_time != "09:30":
@@ -42,8 +44,6 @@ if __name__ == '__main__':
 
             print("Order finished Done!")
 
-            telegram_bot.send_message("Order Finished!")
-
             time.sleep(10)
 
             #Place stop limit and take profit order
@@ -53,6 +53,7 @@ if __name__ == '__main__':
 
             api.cancel_all_orders()
             time.sleep(10)
+            
             # place smaller profit limit order
             gap_test.order_v3(api)
 
@@ -70,21 +71,9 @@ if __name__ == '__main__':
             gap_test.close(api)
 
             print("All positions closed now")
-            telegram_bot.send_message("All positions closed now!")
 
             #Wait until after hour closed
             print("Waiting for after hour to close")
             while market_time != "20:05":
                 time.sleep(10)
                 market_time = market_day.now()
-            #Saves daily performance        
-            # performance.summary(api)
-            # performance.today(api)
-
-            while market_time != "23:59":
-                time.sleep(10)
-                market_time = market_day.now()
-
-            #get daily open close from Polygon.io
-            # datamine.get_open_close()
-            telegram_bot.send_message("Stored daily open/close from Polyon.io")

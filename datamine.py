@@ -1,5 +1,5 @@
 import csv, quandl, yfinance, requests, asyncio, aiohttp
-import profile, market_day
+import profile, market_day, async_aiohttp
 import alpaca_trade_api as tradeapi
 from alpaca_trade_api import REST
 from alpaca_trade_api.rest import TimeFrame
@@ -9,8 +9,8 @@ import pandas as pd
 
 async def get_APIdata(session, url, datas):
     async with session.get(url) as response:
-        result = await response.json()
         try:
+            result = await response.json()
             data = {
                 'ticker'    : result['symbol'],
                 'date'      : result['from'],
@@ -22,8 +22,8 @@ async def get_APIdata(session, url, datas):
             }
             datas.append(data)
         except Exception as e:
+            # print(e)
             pass
-            #print(e)
 
 async def scan(date):
     df = pd.read_csv('./data/tickers/polygon_list.csv')
@@ -32,6 +32,19 @@ async def scan(date):
 
     tickers = df['ticker'].tolist()
 
+    datas = []
+
+    async with aiohttp.ClientSession() as session:
+        tasks = []
+        for ticker in tickers:
+            url = "https://api.polygon.io/v1/open-close/{}/{}?unadjusted=true&apiKey={}".format(ticker, date, profile.POLYGON_API_KEY)
+            task = asyncio.ensure_future(get_APIdata(session, url, datas))
+            tasks.append(task)
+        await asyncio.gather(*tasks)
+
+    return datas
+
+async def scan_backtest(date, tickers):
     datas = []
 
     async with aiohttp.ClientSession() as session:
@@ -135,20 +148,33 @@ def get_tickers_quandl():
             tickers[n] = tickers[n].replace(".csv", "")
             csvwriter.writerow([tickers[n]])
     
-def get_tickers_polygon():
+def get_tickers_polygon(date = market_day.prev_open()):
     tickers = []
 
     with open('./data/tickers/polygon_list.csv', 'w') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(['ticker', 'name', 'locale', 'exchange'])
-        url = "https://api.polygon.io/v3/reference/tickers?active=true&sort=ticker&order=asc&limit=1000&apiKey=" + profile.POLYGON_API_KEY
+        url = "https://api.polygon.io/v3/reference/tickers?date={}&active=true&sort=ticker&order=asc&limit=1000&apiKey={}".format(date, profile.POLYGON_API_KEY)
         response = requests.get(url).json()
         while 'next_url' in response:
             #print(response['next_url'])
             for ticker in response['results']:
-                if 'primary_exchange' in ticker and 'locale' in ticker and '.' not in ticker['ticker'] and len(ticker['ticker']) < 5:
+                if 'locale' in ticker and '.' not in ticker['ticker'] and len(ticker['ticker']) < 5:
                     csvwriter.writerow([ticker['ticker'], ticker['name'], ticker['locale'], ticker['primary_exchange']])
             response = requests.get(response['next_url'] + "&apiKey=" + profile.POLYGON_API_KEY).json()
+    return tickers
+
+def get_tickers_polygon_list(date = market_day.prev_open()):
+    tickers = []
+
+    url = "https://api.polygon.io/v3/reference/tickers?date={}&active=true&sort=ticker&order=asc&limit=1000&apiKey={}".format(date, profile.POLYGON_API_KEY)
+    response = requests.get(url).json()
+    while 'next_url' in response:
+        for ticker in response['results']:
+            if '/' not in ticker['ticker'] and '.' not in ticker['ticker'] and len(ticker['ticker']) < 5:
+                tickers.append(ticker['ticker'])
+        response = requests.get(response['next_url'] + "&apiKey=" + profile.POLYGON_API_KEY).json()
+
     return tickers
 
 def get_less_tickers_polygon():
@@ -168,17 +194,53 @@ def get_less_tickers_polygon():
 
     df.to_csv('./data/tickers/smaller_polygon_list.csv', index = False)
 
+def get_minute(ticker, date = market_day.prev_open()):
+    # print("Getting Minute Data {}".format(date))
+    url = "https://api.polygon.io/v2/aggs/ticker/{}/range/1/minute/{}/{}?adjusted=true&sort=asc&limit=5000&apiKey={}".format(ticker, date, date, profile.POLYGON_API_KEY)
+    response = requests.get(url).json()
+
+    with open('./data/historical/polygon_minute/{}.csv'.format(ticker), 'a') as csvfile:
+            csvwriter = csv.writer(csvfile)
+
+            try:
+                results = response["results"]
+                csvwriter.writerow(['ticker','date','open','high','low','close','volume'])
+                for result in results:
+                    csvwriter.writerow([response['ticker'], market_day.timestamp_to_est(result['t']/1000), result['o'], result['h'], result['l'], result['c'], result['v']])
+            except Exception as e:
+                print(ticker)
+                print(e)
+    
+
 def get_open_close(date = market_day.prev_open()):
     print("Getting Daily Open Close {}".format(date))
     datas = asyncio.run(scan(date))
     for data in datas:
         with open('./data/historical/polygon_daily/{}.csv'.format(data['ticker']), 'a') as csvfile:
             csvwriter = csv.writer(csvfile)
-            #csvwriter.writerow(['ticker','date','open','high','low','close','volume'])
+            # csvwriter.writerow(['ticker','date','open','high','low','close','volume'])
+            csvwriter.writerow([data['ticker'], data['date'], data['open'], data['high'], data['low'], data['close'], data['volume']])
+
+def get_open_close_backtest(tickers, date = market_day.prev_open()):
+    print("Getting Daily Open Close {}".format(date))
+    datas = asyncio.run(scan_backtest(date, tickers))
+    for data in datas:
+        with open('./data/backtest/polygon_daily/{}.csv'.format(data['ticker']), 'w') as csvfile:
+            csvwriter = csv.writer(csvfile)
+            csvwriter.writerow(['ticker','date','open','high','low','close','volume'])
             csvwriter.writerow([data['ticker'], data['date'], data['open'], data['high'], data['low'], data['close'], data['volume']])
     
+
 if __name__ == '__main__':
     print("Let's get some data!")
-
     #run this if trader.py was not terminated correctly.
-    get_open_close()
+    date = "2004-01-01"
+    date = market_day.next_open(date)
+    date = market_day.next_open(date)
+
+    while date != "2021-07-02":
+        print(date)
+        tickers = get_tickers_polygon_list(date)
+        print(len(tickers))
+        asyncio.run(async_aiohttp.scan(tickers, date))
+        date = market_day.next_open(date)

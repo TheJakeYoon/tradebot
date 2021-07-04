@@ -5,49 +5,46 @@ import profile, market_day
 # asyncio method to get polyon data faster
 async def get_APIdata(session, url, close_price, gap):
     async with session.get(url) as response:
+        result = await response.json()
         try:
-            result = await response.json()
-            ticker = result['results']['T']
-            current_price = result['results']['p']
+            ticker = result['symbol']
+            current_price = result['open']
             pct = round(((current_price - close_price) / close_price) * 100, 2)
             gap.append({'ticker' : ticker, 'current_price' : current_price, 'close_price' : close_price, 'pct': pct})
         except Exception as e:
+            # print(e)
             #print(url)
             pass
 
-# gets previous day's close and calls get_APIdata()
-async def get_gap(prev_closes):
+# gets today's close and calls get_APIdata()
+async def get_gap(prev_closes, date):
     gap = []
     async with aiohttp.ClientSession() as session:
         tasks = []
         for prev_close in prev_closes:
-            url = "https://api.polygon.io/v2/last/trade/{}?&apiKey={}".format(prev_close['ticker'], profile.POLYGON_API_KEY)
+            url = "https://api.polygon.io/v1/open-close/{}/{}?adjusted=true&apiKey={}".format(prev_close['ticker'], date, profile.POLYGON_API_KEY)
             task = asyncio.ensure_future(get_APIdata(session, url, prev_close['close_price'], gap))
             tasks.append(task)
         await asyncio.gather(*tasks)
 
     return gap
 
-def get_close():
-    files = pd.read_csv('./data/tickers/smaller_polygon_list.csv')['ticker'].tolist()
-
+def get_close(tickers):
+    
     prev_closes = []
 
-    for file in files:
-        file = "./data/historical/polygon_daily/{}.csv".format(file)
+    for ticker in tickers:
+        file = "./data/backtest/polygon_daily/{}.csv".format(ticker)
         try:
             df = pd.read_csv(file)
         except Exception as e:
             # print(file)
             pass
         try:
-            prev_day = market_day.prev_open()
-            volume = df.loc[df['date'] == prev_day]['volume'].iloc[-1]
-            close_price = df.loc[df['date'] == prev_day]['close'].iloc[-1]
-            # only scans for stocks with higher than daily volume of 1 million.
+            volume = df['volume'].iloc[-1]
+            close_price = df['close'].iloc[-1]
+            # only scans for stocks with higher than daily volume of 1 million and price $10 or higher.
             if volume > 1000000 and close_price > 10:
-                ticker = file.replace('./data/historical/polygon_daily/', '')
-                ticker = ticker.replace('.csv', '')
                 prev_closes.append({'ticker' : ticker, 'close_price' : close_price})
         except Exception as e:
             # print(e)
@@ -60,33 +57,53 @@ def get_close():
 # If S&P is up, looks for gap downs
 # If S&P is down, looks for gap ups
 # 2-8% change and no news
-def scan(api, prev_closes):
-    gaps = asyncio.run(get_gap(prev_closes))
+def scan(api, prev_closes, date):
+    gaps = asyncio.run(get_gap(prev_closes, date))
 
     df = pd.DataFrame(gaps)
     # print(df.info())
     # print(df)
-    df_down = df.loc[(df['pct'] > -5) & (df['pct'] < -2)]
-    df_down.sort_values(by = 'pct', inplace = True, ascending = True)
-    df_up = df.loc[(df['pct'] > 2) & (df['pct'] < 5)]
-    df_up.sort_values(by = 'pct', inplace = True, ascending = False)
-    tickers_down = df_down.to_dict('records')
-    tickers_up = df_up.to_dict('records')
+
+    # checks if S&P 500 is up or down
+    url = "https://api.polygon.io/v1/open-close/SPY/{}?adjusted=true&apiKey={}".format(date, profile.POLYGON_API_KEY)
+    response = requests.get(url).json()
+    try:
+        # checks if S&P500 is up
+        spy_open = response['open']
+        spy_pre = response['preMarket']
+        market_up = True
+        if spy_open - spy_pre > 0:
+            print("SPY up today")
+            df.sort_values(by = 'pct', inplace = True, ascending = True)
+            df = df.loc[(df['pct'] > -5) & (df['pct'] < -3)]
+        else:
+            print("SPY down today")
+            market_up = False
+            df.sort_values(by = 'pct', inplace = True, ascending = False)
+            df = df.loc[(df['pct'] > 3) & (df['pct'] < 5)]
+    except Exception as e:
+        print(e)
+        print("Couldn't check if SPY was up or down")
+
+    tickers = df.to_dict('records')
 
     gappers = []
     count = 0
 
-    for i in range(len(tickers_down)):
+    for i in range(len(tickers)):
         date = market_day.prev_open()
         # check for news
-        url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(tickers_down[i]['ticker'], date, profile.POLYGON_API_KEY)
+        url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(tickers[i]['ticker'], date, profile.POLYGON_API_KEY)
         response = requests.get(url).json()
         # only pick 10 stocks
         if count < 10:
             if not response['results']:
                 # print("No news")
-                tickers_down[i]['side'] = 'buy'
-                gappers.append(tickers_down[i])
+                if market_up:
+                    tickers[i]['side'] = 'buy'
+                else:
+                    tickers[i]['side'] = 'sell'
+                gappers.append(tickers[i])
                 count += 1
             else:
                 pass
@@ -94,34 +111,15 @@ def scan(api, prev_closes):
         else:
             break
 
-    # print(len(tickers_up))
-    count = 0
-    for i in range(len(tickers_up)):
-        date = market_day.prev_open()
-        # check for news
-        url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(tickers_up[i]['ticker'], date, profile.POLYGON_API_KEY)
-        response = requests.get(url).json()
-        # only pick 10 stocks
-        if count < 10:
-            if not response['results']:
-                # print("No news")
-                tickers_up[i]['side'] = 'sell'
-                gappers.append(tickers_up[i])
-                count += 1
-            else:
-                # print("News released {}".format(tickers_up[i]['ticker']))
-                pass
-        else:
-            break
-
     # print(gappers)
+
     return gappers
 
 def order(api, tickers):
 
     account = api.get_account()
     initial_cash = float(account.buying_power)
-    initial_cash = 20000
+    initial_cash = 30000
 
     for ticker in tickers:
 
@@ -131,7 +129,7 @@ def order(api, tickers):
             limit_price = price * 1.005
         elif ticker['side'] == 'sell':
             limit_price = price * 0.995
-        qty = math.floor((initial_cash * 0.05 ) / price)
+        qty = math.floor((initial_cash * 0.1 ) / price)
 
         if qty > 0:
             try:
