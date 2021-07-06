@@ -49,9 +49,6 @@ if __name__ == '__main__':
             #Place stop limit and take profit order
             gap.order_v2(api, tickers)
 
-            api.cancel_all_orders()
-            time.sleep(10)
-
             while api.list_positions() is not None and market_time != "12:01":
                 time.sleep(10)
                 market_time = market_day.now()

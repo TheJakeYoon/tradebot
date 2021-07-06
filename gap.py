@@ -174,6 +174,7 @@ def order_v2(api, tickers):
                             stop_loss={'stop_price': float(position.avg_entry_price) * (1 - (pct/100))},
                             take_profit={'limit_price': float(position.avg_entry_price) * (1 + (pct/200))}
                         )
+                        print("Profit/Loss Order Placed!")
                     except Exception as e:
                         print(e)
                 elif position.side == 'short':
@@ -188,6 +189,7 @@ def order_v2(api, tickers):
                             stop_loss={'stop_price': float(position.avg_entry_price) * (1 + (pct/100))},
                             take_profit={'limit_price': float(position.avg_entry_price) * (1 + (pct/100))}
                         )
+                        print("Profit/Loss Order Placed!")
                     except Exception as e:
                         print(e)
         else:
@@ -210,6 +212,7 @@ def order_v3(api):
                             stop_loss={'stop_price': float(position.avg_entry_price) * 0.98},
                             take_profit={'limit_price': float(position.avg_entry_price) * 1.02}
                         )
+                        print("Profit/Loss Order Updated!")
                     except Exception as e:
                         print(e)
                 elif position.side == 'short':
@@ -224,6 +227,7 @@ def order_v3(api):
                             stop_loss={'stop_price': float(position.avg_entry_price) * 1.02},
                             take_profit={'limit_price': float(position.avg_entry_price) * 0.98}
                         )
+                        print("Profit/Loss Order Updated!")
                     except Exception as e:
                         print(e)
         else:
@@ -244,6 +248,7 @@ def order_v4(api):
                             time_in_force='day',
                             limit_price=float(position.current_price) * 0.99
                         )
+                        print("Profit/Loss Order Updated Again!")
                     except Exception as e:
                         print(e)
                 elif position.side == 'short':
@@ -256,6 +261,7 @@ def order_v4(api):
                             time_in_force='day',
                             limit_price=float(position.current_price) * 1.01
                         )
+                        print("Profit/Loss Order Updated Again!")
                     except Exception as e:
                         print(e)
         else:
