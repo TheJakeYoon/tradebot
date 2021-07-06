@@ -18,42 +18,65 @@ def process_order(Backtest, time, symbol, qty, side, entry_price, stop_loss, tak
         # print("{} - {}".format(price, entry_price))
         if price == entry_price:
             # print("Order Successful")
-            # print(price)
+            initial_cash = 5000
+            print(symbol)
+            print(price, take_profit, stop_loss)
             order_open = True
             while order_open:
                 if side == "buy":
                     price = df.loc[df["date"] == time]["low"].iloc[-1]
                     if price < stop_loss:
                         print("Stop Loss Reached")
+                        Backtest.loss += 1
+                        print(time)
                         order_open = False
+                        Backtest.initial_cash += qty * entry_price
+                        Backtest.amount += qty * entry_price
                         Backtest.amount -= round((entry_price - stop_loss) * qty, 2)
                     else:
                         price = df.loc[df["date"] == time]["high"].iloc[-1]
                         if price < stop_loss:
-                            print("Take lossProfit Reached")
+                            print("Take Profit Reached")
+                            Backtest.profit += 1
+                            print(time)
                             order_open = False
+                            Backtest.initial_cash += qty * entry_price
+                            Backtest.amount += qty * entry_price
                             Backtest.amount += round((take_profit - entry_price) * qty, 2)        
                 elif side == "sell":
                     price = df.loc[df["date"] == time]["high"].iloc[-1]
                     if price > stop_loss:
                         print("Stop Loss Reached")
+                        Backtest.loss += 1
+                        print(time)
                         order_open = False
+                        Backtest.initial_cash += qty * entry_price
+                        Backtest.amount += qty * entry_price
                         Backtest.amount -= round((stop_loss - entry_price) * qty, 2)
                     else:
                         price = df.loc[df["date"] == time]["low"].iloc[-1]
                         if price < take_profit:
                             print("Take Profit Reached")
+                            Backtest.profit += 1
+                            print(time)
                             order_open = False
+                            Backtest.initial_cash += qty * entry_price
+                            Backtest.amount += qty * entry_price
                             Backtest.amount += round((entry_price - take_profit) * qty, 2)
                 time = market_day.next_minute(time)
                 temp = time.split(" ", 2)[1]
-                if temp == "16:00":
+                if temp == "12:00":
                     price = df.loc[df["date"] == time]["close"].iloc[-1]
-                    print("End of Day Reached")
+                    print("Noon Reached")
                     order_open = False
+                    Backtest.timed_out += 1
                     if side == "buy":
+                        Backtest.initial_cash += qty * entry_price
+                        Backtest.amount += qty * entry_price
                         Backtest.amount += round((price - entry_price) * qty, 2)
                     elif side == "sell":
+                        Backtest.initial_cash += qty * entry_price
+                        Backtest.amount += qty * entry_price
                         Backtest.amount += round((entry_price - price) * qty, 2)
         return 0
     except Exception as e:
@@ -69,7 +92,6 @@ class Order:
         self.qty = qty
         self.side = side
         self.failed_order = 0
-
         try:
             df = pd.read_csv("./data/backtest/polygon_minute/{}.csv".format(symbol))
             price = df.loc[df["date"] == time]["open"].iloc[-1]
@@ -80,11 +102,15 @@ class Order:
 
 class Backtest:
     def __init__(self, start_amount, start_date, end_date):
-        self.start_amount = start_amount
-        self.amount = start_amount
+        self.initial_cash = 0
+        self.start_amount = 0
+        self.amount = 0
         self.start_date = start_date
         self.end_date = end_date
         self.time = "{} 09:30".format(start_date)
+        self.profit = 0
+        self.loss = 0
+        self.timed_out = 0
 
         self.positions = []
 
@@ -105,8 +131,6 @@ if __name__ == '__main__':
     print(date)
     prev_date = market_day.prev_open(date)
     Backtest = Backtest(10000, date, date)
-    initial_cash = Backtest.amount
-    print("Starting Cash : {}".format(initial_cash))
 
     tickers = datamine.get_tickers_polygon_list(prev_date)
 
@@ -118,31 +142,31 @@ if __name__ == '__main__':
     gappers = gap_backtest.scan(None, prev_closes, date)
 
     print(len(gappers))
+    # print(gappers)
 
     # save today's minute bars 
     asyncio.run(async_aiohttp.scan(gappers, date))
 
-    initial_cash = Backtest.amount
     failed_order = 0
     for ticker in gappers:
         price = ticker['current_price']
-        qty = math.floor(initial_cash * 0.1 / price)
+        profit_pct = abs(ticker['pct'] / 2)
+        loss_pct = abs(ticker['pct'])
+        qty = math.floor(5000 / price)
         if ticker['side'] == "buy":
-            stop_loss = price * 0.98
-            take_profit = price * 1.02
+            stop_loss = price * (1 - (loss_pct/100))
+            take_profit = price * (1 + (profit_pct/100))
         elif ticker['side'] == "sell":
-            stop_loss = price * 1.02
-            take_profit = price * 0.98
+            stop_loss = price * (1 + (loss_pct/100))
+            take_profit = price * (1 - (profit_pct/100))
         failed_order += Backtest.submit_order(ticker['ticker'], qty, ticker['side'], price, stop_loss, take_profit)
-        print(Backtest.amount)
-    pct = round((Backtest.amount - initial_cash) / initial_cash * 100, 2)
-    final_amount = (Backtest.amount - (0.1 * failed_order * initial_cash))
-    init_amount = (initial_cash - (0.1 * failed_order * initial_cash))
-    pct_2 = round((final_amount - init_amount) / init_amount * 100, 2)
+    pct = round((Backtest.amount - Backtest.initial_cash) / Backtest.initial_cash * 100, 2)
+    print(Backtest.initial_cash)
+    print(Backtest.amount)
     print(pct)
-    print(pct_2)
+    print("Total : {} Stop : {} Profit: {}  Closed on Noon:  {} Failed:  {}".format(len(gappers), Backtest.loss, Backtest.profit, Backtest.timed_out, failed_order))
     with open('./data/backtest/results/backtest_1.csv', 'a') as csvfile:
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow([date, pct, init_amount, round(final_amount, 2), pct_2])
+        csvwriter.writerow([date, Backtest.initial_cash, Backtest.amount, pct])
     # Backtest.submit_order("AAPL", 10, "buy", 42.4, 46)
     # print(Backtest.amount)

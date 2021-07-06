@@ -1,2 +1,8 @@
 __pycache__/
 data/
+backtest/
+
+.*
+
+backtest.py
+gap_backtest.py

@@ -26,7 +26,7 @@ async def get_APIdata(session, url, datas):
             pass
 
 async def scan(date):
-    df = pd.read_csv('./data/tickers/polygon_list.csv')
+    df = pd.read_csv('./data/tickers/assets_list.csv')
 
     errors = []
 
@@ -37,7 +37,7 @@ async def scan(date):
     async with aiohttp.ClientSession() as session:
         tasks = []
         for ticker in tickers:
-            url = "https://api.polygon.io/v1/open-close/{}/{}?unadjusted=true&apiKey={}".format(ticker, date, profile.POLYGON_API_KEY)
+            url = "https://api.polygon.io/v1/open-close/{}/{}?adjusted=true&apiKey={}".format(ticker, date, profile.POLYGON_API_KEY)
             task = asyncio.ensure_future(get_APIdata(session, url, datas))
             tasks.append(task)
         await asyncio.gather(*tasks)
@@ -50,7 +50,7 @@ async def scan_backtest(date, tickers):
     async with aiohttp.ClientSession() as session:
         tasks = []
         for ticker in tickers:
-            url = "https://api.polygon.io/v1/open-close/{}/{}?unadjusted=true&apiKey={}".format(ticker, date, profile.POLYGON_API_KEY)
+            url = "https://api.polygon.io/v1/open-close/{}/{}?adjusted=true&apiKey={}".format(ticker, date, profile.POLYGON_API_KEY)
             task = asyncio.ensure_future(get_APIdata(session, url, datas))
             tasks.append(task)
         await asyncio.gather(*tasks)
@@ -130,7 +130,7 @@ def get_all_stocks():
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(ticker)
         for asset in assets:
-            if asset.tradable:
+            if asset.tradable and asset.shortable and asset.easy_to_borrow and '.' not in asset.symbol:
                 count += 1
                 ticker = [asset.symbol]
                 csvwriter.writerow(ticker)
@@ -216,9 +216,9 @@ def get_open_close(date = market_day.prev_open()):
     print("Getting Daily Open Close {}".format(date))
     datas = asyncio.run(scan(date))
     for data in datas:
-        with open('./data/historical/polygon_daily/{}.csv'.format(data['ticker']), 'a') as csvfile:
+        with open('./data/historical/polygon_daily/{}.csv'.format(data['ticker']), 'w') as csvfile:
             csvwriter = csv.writer(csvfile)
-            # csvwriter.writerow(['ticker','date','open','high','low','close','volume'])
+            csvwriter.writerow(['ticker','date','open','high','low','close','volume'])
             csvwriter.writerow([data['ticker'], data['date'], data['open'], data['high'], data['low'], data['close'], data['volume']])
 
 def get_open_close_backtest(tickers, date = market_day.prev_open()):
@@ -234,13 +234,4 @@ def get_open_close_backtest(tickers, date = market_day.prev_open()):
 if __name__ == '__main__':
     print("Let's get some data!")
     #run this if trader.py was not terminated correctly.
-    date = "2004-01-01"
-    date = market_day.next_open(date)
-    date = market_day.next_open(date)
-
-    while date != "2021-07-02":
-        print(date)
-        tickers = get_tickers_polygon_list(date)
-        print(len(tickers))
-        asyncio.run(async_aiohttp.scan(tickers, date))
-        date = market_day.next_open(date)
+    get_open_close()

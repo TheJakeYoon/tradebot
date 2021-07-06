@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
 #Referenced from Udemy Algorithmic Trading
 
@@ -57,9 +58,7 @@ def calmar(DF):
     df = DF.copy()
     return cagr(df) / max_drawdown(df)
 
-if __name__ == '__main__':
-    df = pd.read_csv("./performance/alpaca.csv")
-
+def graph_performance(df):
     print("CAGR = {}%".format(cagr(df)))
     print("Volatility = {}%".format(volatility(df)))
     print("Sharpe Ratio = {}".format(sharpe(df, 0.02)))
@@ -86,5 +85,14 @@ if __name__ == '__main__':
 
     ax.grid(False)
     plt.show()
+
+def graph_candlestick(df):
+    fig = go.Figure(data = [go.Candlestick(x = df['date'], open = df['open'], high = df['high'], low = df['low'], close = df['close'])])
+    fig.show()
+
+if __name__ == '__main__':
+    df = pd.read_csv("./data/backtest/polygon_minute/CHWY.csv")
+    graph_candlestick(df)
+
 
 

@@ -47,14 +47,10 @@ if __name__ == '__main__':
             time.sleep(10)
 
             #Place stop limit and take profit order
-            gap.order_v2(api)
-
-            time.sleep(5400)
+            gap.order_v2(api, tickers)
 
             api.cancel_all_orders()
             time.sleep(10)
-            # place smaller profit limit order
-            gap.order_v3(api)
 
             while api.list_positions() is not None and market_time != "12:01":
                 time.sleep(10)
@@ -62,10 +58,13 @@ if __name__ == '__main__':
                 if market_time == "12:00":
                     pass
                     #Strategy specific!!!!!!
-                    gap.order_v4(api)
+                    gap.order_v3(api)
 
             time.sleep(1800)
 
+            api.cancel_all_orders()
+            gap.order_v4(api)
+            time.sleep(1800)
             api.cancel_all_orders()
             gap.close(api)
 

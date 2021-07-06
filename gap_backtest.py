@@ -3,14 +3,16 @@ import requests, math, asyncio, aiohttp
 import profile, market_day
 
 # asyncio method to get polyon data faster
-async def get_APIdata(session, url, close_price, gap):
+async def get_APIdata(session, url, prev_close, gap):
     async with session.get(url) as response:
         result = await response.json()
         try:
-            ticker = result['symbol']
             current_price = result['open']
+            close_price = prev_close['close_price']
             pct = round(((current_price - close_price) / close_price) * 100, 2)
-            gap.append({'ticker' : ticker, 'current_price' : current_price, 'close_price' : close_price, 'pct': pct})
+            prev_close['current_price'] = current_price
+            prev_close['pct'] = pct
+            gap.append(prev_close)
         except Exception as e:
             # print(e)
             #print(url)
@@ -23,7 +25,7 @@ async def get_gap(prev_closes, date):
         tasks = []
         for prev_close in prev_closes:
             url = "https://api.polygon.io/v1/open-close/{}/{}?adjusted=true&apiKey={}".format(prev_close['ticker'], date, profile.POLYGON_API_KEY)
-            task = asyncio.ensure_future(get_APIdata(session, url, prev_close['close_price'], gap))
+            task = asyncio.ensure_future(get_APIdata(session, url, prev_close, gap))
             tasks.append(task)
         await asyncio.gather(*tasks)
 
@@ -43,9 +45,11 @@ def get_close(tickers):
         try:
             volume = df['volume'].iloc[-1]
             close_price = df['close'].iloc[-1]
+            low_price = df['low'].iloc[-1]
+            high_price = df['high'].iloc[-1]
             # only scans for stocks with higher than daily volume of 1 million and price $10 or higher.
             if volume > 1000000 and close_price > 10:
-                prev_closes.append({'ticker' : ticker, 'close_price' : close_price})
+                prev_closes.append({'ticker' : ticker, 'close_price' : close_price, 'prev_low' : low_price, 'prev_high' : high_price})
         except Exception as e:
             # print(e)
             # print("Make sure to get previous open close")
@@ -64,49 +68,59 @@ def scan(api, prev_closes, date):
     # print(df.info())
     # print(df)
 
-    # checks if S&P 500 is up or down
-    url = "https://api.polygon.io/v1/open-close/SPY/{}?adjusted=true&apiKey={}".format(date, profile.POLYGON_API_KEY)
-    response = requests.get(url).json()
     try:
-        # checks if S&P500 is up
-        spy_open = response['open']
-        spy_pre = response['preMarket']
-        market_up = True
-        if spy_open - spy_pre > 0:
-            print("SPY up today")
-            df.sort_values(by = 'pct', inplace = True, ascending = True)
-            df = df.loc[(df['pct'] > -5) & (df['pct'] < -3)]
-        else:
-            print("SPY down today")
-            market_up = False
-            df.sort_values(by = 'pct', inplace = True, ascending = False)
-            df = df.loc[(df['pct'] > 3) & (df['pct'] < 5)]
+        df = df.loc[(df['pct'] > -5) & (df['pct'] < -2)]
+        df_down = df.loc[df['prev_low'] < df['current_price']]
+        df_down.sort_values(by = 'pct', inplace = True, ascending = True)
+        df = pd.DataFrame(gaps)
+        df = df.loc[(df['pct'] > 2) & (df['pct'] < 5)]
+        df_up = df.loc[df['prev_high'] > df['current_price']]
+        df_up.sort_values(by = 'pct', inplace = True, ascending = False)
+        tickers_down = df_down.to_dict('records')
+        tickers_up = df_up.to_dict('records')
     except Exception as e:
         print(e)
-        print("Couldn't check if SPY was up or down")
-
-    tickers = df.to_dict('records')
 
     gappers = []
     count = 0
 
-    for i in range(len(tickers)):
+    print(len(tickers_down))
+    print(len(tickers_up))
+
+    for ticker in tickers_down:
         date = market_day.prev_open()
         # check for news
-        url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(tickers[i]['ticker'], date, profile.POLYGON_API_KEY)
-        response = requests.get(url).json()
+        # url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(tickers[i]['ticker'], date, profile.POLYGON_API_KEY)
+        # response = requests.get(url).json()
         # only pick 10 stocks
         if count < 10:
-            if not response['results']:
+            # if not response['results']:
                 # print("No news")
-                if market_up:
-                    tickers[i]['side'] = 'buy'
-                else:
-                    tickers[i]['side'] = 'sell'
-                gappers.append(tickers[i])
+                ticker['side'] = 'buy'
+                gappers.append(ticker)
                 count += 1
-            else:
-                pass
+            # else:
+                # pass
+                # print("News released {}".format(tickers[i]['ticker']))
+        else:
+            break
+
+    count = 0
+
+    for ticker in tickers_up:
+        date = market_day.prev_open()
+        # check for news
+        # url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(tickers[i]['ticker'], date, profile.POLYGON_API_KEY)
+        # response = requests.get(url).json()
+        # only pick 10 stocks
+        if count < 10:
+            # if not response['results']:
+                # print("No news")
+                ticker['side'] = 'sell'
+                gappers.append(ticker)
+                count += 1
+            # else:
+                # pass
                 # print("News released {}".format(tickers[i]['ticker']))
         else:
             break
