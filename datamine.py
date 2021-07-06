@@ -234,4 +234,5 @@ def get_open_close_backtest(tickers, date = market_day.prev_open()):
 if __name__ == '__main__':
     print("Let's get some data!")
     #run this if trader.py was not terminated correctly.
+    get_all_stocks()
     get_open_close()
