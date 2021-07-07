@@ -10,6 +10,13 @@ def start(update: Update, context: CallbackContext):
     update.message.reply_text("Very Intelligent Robot Object!")
     update.message.reply_text("Chat ID is " + str(update.message.chat_id))
 
+def list_commands(update: Update, context: CallbackContext):
+    if str(update.message.chat_id) == profile.TELEGRAM_CHAT_ID:
+        user = update.effective_user
+        update.message.reply_text("/status for an overview and P/L of the account")
+        update.message.reply_text("/positions for current status of all open positions")
+        update.message.reply_text("/close to close all open positions")
+
 def send_message(text):
     url = "https://api.telegram.org/bot{}/sendMessage?chat_id={}&parse_mode=Markdown&text={}".format(profile.TELEGRAM_API_KEY, profile.TELEGRAM_CHAT_ID, text)
     response = requests.get(url)
@@ -84,6 +91,7 @@ def main():
     dispatcher = updater.dispatcher
     
     dispatcher.add_handler(CommandHandler("start", start))
+    dispatcher.add_handler(CommandHandler("help", list_commands))
     dispatcher.add_handler(CommandHandler("status", status))
     dispatcher.add_handler(CommandHandler("positions", positions))
     dispatcher.add_handler(CommandHandler("close", close))

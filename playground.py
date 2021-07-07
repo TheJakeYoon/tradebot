@@ -4,26 +4,30 @@ import pytz, requests, json, time
 import pandas as pd
 import market_day, datamine, gap, profile, kakao, performance, telegram_bot
 
-start = datetime.now()
+# start = datetime.now()
 
-api = tradeapi.REST(
-        profile.APCA_API_KEY_ID,
-        profile.APCA_API_SECRET_KEY,
-        profile.APCA_API_BASE_URL
-    )
+# api = tradeapi.REST(
+#         profile.APCA_API_KEY_ID,
+#         profile.APCA_API_SECRET_KEY,
+#         profile.APCA_API_BASE_URL
+#     )
 
-prev_closes = gap.get_close()
+# prev_closes = gap.get_close()
 
-print(datetime.now() - start)
-start = datetime.now()
+# print(datetime.now() - start)
+# start = datetime.now()
 
-tickers = gap.scan(api, prev_closes)
-print(tickers)
-print(datetime.now() - start)
-start = datetime.now()
+# tickers = gap.scan(api, prev_closes)
+# print(tickers)
+# print(datetime.now() - start)
+# start = datetime.now()
 
-gap.order(api, tickers)
-telegram_bot.send_message("Order Finished")
+# gap.order(api, tickers)
+# telegram_bot.send_message("Order Finished")
 
-# get runtime
-print(datetime.now() - start)
+# # get runtime
+# print(datetime.now() - start)
+
+df = pd.read_csv("./data/backtest/results/backtest_2.csv")
+avg_pct = df['pct'].sum() / len(df.index)
+print(avg_pct)
