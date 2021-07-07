@@ -19,11 +19,11 @@ start = datetime.now()
 
 tickers = gap.scan(api, prev_closes)
 print(tickers)
-print(datetime.now() - start)
-start = datetime.now()
+# print(datetime.now() - start)
+# start = datetime.now()
 
-gap.order(api, tickers)
-telegram_bot.send_message("Order Finished")
+# gap.order(api, tickers)
+# telegram_bot.send_message("Order Finished")
 
 # get runtime
 print(datetime.now() - start)
