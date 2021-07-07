@@ -57,15 +57,15 @@ def today(api):
     
     date = market_day.today()
 
-    equity = round(float(account.equity), 2)
+    equity = 20000
     balance_change = float(account.equity) - float(account.last_equity)
     balance_change = round(balance_change, 2)
 
-    pct = round((balance_change / float(account.last_equity)) * 100, 2)
+    pct = round((balance_change / 20000) * 100, 2)
 
     with open('./performance/alpaca.csv', 'a') as csvfile:
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow([date, equity, balance_change, pct])
+        csvwriter.writerow([date, float(account.equity) - 10000, balance_change, pct])
 
     telegram_bot.send_message("Equity : ${}".format(round(float(account.equity), 2)))
 

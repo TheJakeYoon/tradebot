@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
     # run forever!
     while True:
-        print("Trading Bot Started!")
+        print("Paper Trading Bot Started!")
         print(market_day.now())
 
         if api.get_clock().is_open:
@@ -39,23 +39,15 @@ if __name__ == '__main__':
             print("Scanning for stocks")
             tickers = gap_test.scan(api, prev_closes)
 
-            print("Ordering now")
+            print("Paper ordering now")
             gap_test.order(api, tickers)
 
-            print("Order finished Done!")
+            print("Paper order finished Done!")
 
             time.sleep(10)
 
             #Place stop limit and take profit order
             gap_test.order_v2(api)
-
-            time.sleep(5400)
-
-            api.cancel_all_orders()
-            time.sleep(10)
-            
-            # place smaller profit limit order
-            gap_test.order_v3(api)
 
             while api.list_positions() is not None and market_time != "12:01":
                 time.sleep(10)
@@ -63,17 +55,11 @@ if __name__ == '__main__':
                 if market_time == "12:00":
                     pass
                     #Strategy specific!!!!!!
-                    gap_test.order_v4(api)
+                    gap_test.order_v3(api)
 
             time.sleep(1800)
 
             api.cancel_all_orders()
             gap_test.close(api)
 
-            print("All positions closed now")
-
-            #Wait until after hour closed
-            print("Waiting for after hour to close")
-            while market_time != "20:05":
-                time.sleep(10)
-                market_time = market_day.now()
+            print("All paper positions closed now")

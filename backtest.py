@@ -1,4 +1,4 @@
-import math, asyncio, csv
+import math, asyncio, csv, caffeine
 import datamine, market_day, gap_backtest, async_aiohttp
 import pandas as pd
 
@@ -127,46 +127,49 @@ class Backtest:
 
 if __name__ == '__main__':
 
-    date = market_day.random_date()
-    print(date)
-    prev_date = market_day.prev_open(date)
-    Backtest = Backtest(10000, date, date)
+    caffeine.on()
 
-    tickers = datamine.get_tickers_polygon_list(prev_date)
+    date = "2019-01-01"
 
-    # save previous day's open close
-    datamine.get_open_close_backtest(tickers, prev_date)
-    prev_closes = gap_backtest.get_close(tickers)
-    print(len(prev_closes))
+    while date != market_day.next_open("2020-01-01"):
+        date = market_day.next_open(date)
+        print(date)
+        prev_date = market_day.prev_open(date)
+        backtest = Backtest(10000, date, date)
 
-    gappers = gap_backtest.scan(None, prev_closes, date)
+        tickers = datamine.get_tickers_polygon_list(prev_date)
 
-    print(len(gappers))
-    # print(gappers)
+        # save previous day's open close
+        datamine.get_open_close_backtest(tickers, prev_date)
+        prev_closes = gap_backtest.get_close(tickers)
+        print(len(prev_closes))
 
-    # save today's minute bars 
-    asyncio.run(async_aiohttp.scan(gappers, date))
+        gappers = gap_backtest.scan(None, prev_closes, date)
 
-    failed_order = 0
-    for ticker in gappers:
-        price = ticker['current_price']
-        profit_pct = abs(ticker['pct'] / 2)
-        loss_pct = abs(ticker['pct'])
-        qty = math.floor(5000 / price)
-        if ticker['side'] == "buy":
-            stop_loss = price * (1 - (loss_pct/100))
-            take_profit = price * (1 + (profit_pct/100))
-        elif ticker['side'] == "sell":
-            stop_loss = price * (1 + (loss_pct/100))
-            take_profit = price * (1 - (profit_pct/100))
-        failed_order += Backtest.submit_order(ticker['ticker'], qty, ticker['side'], price, stop_loss, take_profit)
-    pct = round((Backtest.amount - Backtest.initial_cash) / Backtest.initial_cash * 100, 2)
-    print(Backtest.initial_cash)
-    print(Backtest.amount)
-    print(pct)
-    print("Total : {} Stop : {} Profit: {}  Closed on Noon:  {} Failed:  {}".format(len(gappers), Backtest.loss, Backtest.profit, Backtest.timed_out, failed_order))
-    with open('./data/backtest/results/backtest_1.csv', 'a') as csvfile:
-        csvwriter = csv.writer(csvfile)
-        csvwriter.writerow([date, Backtest.initial_cash, Backtest.amount, pct])
-    # Backtest.submit_order("AAPL", 10, "buy", 42.4, 46)
-    # print(Backtest.amount)
+        print(len(gappers))
+        # print(gappers)
+
+        # save today's minute bars 
+        asyncio.run(async_aiohttp.scan(gappers, date))
+
+        failed_order = 0
+        for ticker in gappers:
+            price = ticker['current_price']
+            profit_pct = abs(ticker['pct'] / 1.25)
+            loss_pct = abs(ticker['pct'])
+            qty = math.floor(5000 / price)
+            if ticker['side'] == "buy":
+                stop_loss = price * (1 - (loss_pct/100))
+                take_profit = price * (1 + (profit_pct/100))
+            elif ticker['side'] == "sell":
+                stop_loss = price * (1 + (loss_pct/100))
+                take_profit = price * (1 - (profit_pct/100))
+            failed_order += backtest.submit_order(ticker['ticker'], qty, ticker['side'], price, stop_loss, take_profit)
+        pct = round((backtest.amount - backtest.initial_cash) / backtest.initial_cash * 100, 2)
+        print(backtest.initial_cash)
+        print(backtest.amount)
+        print(pct)
+        print("Total : {} Stop : {} Profit: {}  Closed on Noon:  {} Failed:  {}".format(len(gappers), backtest.loss, backtest.profit, backtest.timed_out, failed_order))
+        with open('./data/backtest/results/backtest_2.csv', 'a') as csvfile:
+            csvwriter = csv.writer(csvfile)
+            csvwriter.writerow([date, round(backtest.initial_cash, 2), round(backtest.amount, 2), pct, len(gappers), backtest.loss, backtest.profit, backtest.timed_out, failed_order])

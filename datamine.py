@@ -1,5 +1,5 @@
 import csv, quandl, yfinance, requests, asyncio, aiohttp
-import profile, market_day, async_aiohttp
+import profile, market_day, async_aiohttp, caffeine
 import alpaca_trade_api as tradeapi
 from alpaca_trade_api import REST
 from alpaca_trade_api.rest import TimeFrame
@@ -225,14 +225,25 @@ def get_open_close_backtest(tickers, date = market_day.prev_open()):
     print("Getting Daily Open Close {}".format(date))
     datas = asyncio.run(scan_backtest(date, tickers))
     for data in datas:
-        with open('./data/backtest/polygon_daily/{}.csv'.format(data['ticker']), 'w') as csvfile:
+        with open('./data/backtest/polygon_daily/{}.csv'.format(data['ticker']), 'a') as csvfile:
             csvwriter = csv.writer(csvfile)
-            csvwriter.writerow(['ticker','date','open','high','low','close','volume'])
+            # csvwriter.writerow(['ticker','date','open','high','low','close','volume'])
             csvwriter.writerow([data['ticker'], data['date'], data['open'], data['high'], data['low'], data['close'], data['volume']])
     
 
 if __name__ == '__main__':
-    print("Let's get some data!")
-    #run this if trader.py was not terminated correctly.
-    get_all_stocks()
+    # caffeine.on()
+    # print("Let's get some data!")
+    # #run this if trader.py was not terminated correctly.
+    # date = "2010-01-01"
+    # date = market_day.next_open(date)
+
+    # while date != market_day.next_open("2021-07-01"):
+    #     date = market_day.next_open(date)
+    #     tickers = get_tickers_polygon_list(date)
+    #     df = pd.DataFrame({'ticker' : tickers})
+    #     df.to_csv("./data/backtest/polygon_tickers/{}.csv".format(date), index = False)
+    #     print(len(tickers))
+    #     get_open_close_backtest(tickers, date)
+
     get_open_close()
