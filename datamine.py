@@ -232,16 +232,18 @@ def get_open_close_backtest(tickers, date = market_day.prev_open()):
     
 
 if __name__ == '__main__':
-    caffeine.on()
-    print("Let's get some data!")
-    #run this if trader.py was not terminated correctly.
-    date = "2010-01-01"
-    date = market_day.next_open(date)
+    # caffeine.on()
+    # print("Let's get some data!")
+    # #run this if trader.py was not terminated correctly.
+    # date = "2010-01-01"
+    # date = market_day.next_open(date)
 
-    while date != market_day.next_open("2021-07-01"):
-        date = market_day.next_open(date)
-        tickers = get_tickers_polygon_list(date)
-        df = pd.DataFrame({'ticker' : tickers})
-        df.to_csv("./data/backtest/polygon_tickers/{}.csv".format(date), index = False)
-        print(len(tickers))
-        get_open_close_backtest(tickers, date)
+    # while date != market_day.next_open("2021-07-01"):
+    #     date = market_day.next_open(date)
+    #     tickers = get_tickers_polygon_list(date)
+    #     df = pd.DataFrame({'ticker' : tickers})
+    #     df.to_csv("./data/backtest/polygon_tickers/{}.csv".format(date), index = False)
+    #     print(len(tickers))
+    #     get_open_close_backtest(tickers, date)
+
+    get_open_close()
