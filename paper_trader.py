@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
         prev_closes = gap_test.get_close()
         tickers = gap_test.scan(api, prev_closes)
-        print(tickers)
+        # print(tickers)
 
         market_time = market_day.now()
         while market_time != "09:30":
