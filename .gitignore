@@ -1,8 +1,11 @@
 __pycache__/
+analysis/
 data/
-backtest/
-
 .*
-
 backtest.py
 gap_backtest.py
+gap_analysis.py
+async_aiohttp.py
+kakao.py
+example.py
+datamine_mac.py
