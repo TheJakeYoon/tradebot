@@ -80,8 +80,9 @@ if __name__ == '__main__':
                 market_time = market_day.now()
 
             #get daily open close from Polygon.io
-            datamine.get_open_close()
-            telegram_bot.send_message("Stored daily open/close from Polyon.io")
+            date = market_day.today()
+            datamine.get_open_close(date)
+            telegram_bot.send_message("Stored daily open/close from Polyon.io {}".format(date))
 
             #Saves daily performance
             try:        
