@@ -157,6 +157,7 @@ def order(api, tickers):
 
 # oco (One Cancels Other) stop limit and profit limit order after market order
 def order_v2(api, tickers):
+        print("Order_v2")
         df = pd.DataFrame(tickers)
         positions = api.list_positions()
         if positions is not None:

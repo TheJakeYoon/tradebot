@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
             telegram_bot.send_message("Order Finished!")
 
-            time.sleep(10)
+            time.sleep(30)
 
             #Place stop limit and take profit order
             gap.order_v2(api, tickers)
@@ -55,6 +55,7 @@ if __name__ == '__main__':
                 if market_time == "12:00":
                     pass
                     #Strategy specific!!!!!!
+                    api.cancel_all_orders()
                     gap.order_v3(api)
 
             time.sleep(1800)
