@@ -167,7 +167,7 @@ def order_v2(api, tickers):
                     try:
                         api.submit_order(
                             symbol=position.symbol,
-                            qty=float(position.qty),
+                            qty=abs(float(position.qty)),
                             side='sell',
                             type='limit',
                             time_in_force='day',
@@ -182,7 +182,7 @@ def order_v2(api, tickers):
                     try:
                         api.submit_order(
                             symbol=position.symbol,
-                            qty=float(position.qty),
+                            qty=abs(float(position.qty)),
                             side='buy',
                             type='limit',
                             time_in_force='day',
@@ -205,7 +205,7 @@ def order_v3(api):
                     try:
                         api.submit_order(
                             symbol=position.symbol,
-                            qty=float(position.qty),
+                            qty=abs(float(position.qty)),
                             side='sell',
                             type='limit',
                             time_in_force='day',
@@ -220,7 +220,7 @@ def order_v3(api):
                     try:
                         api.submit_order(
                             symbol=position.symbol,
-                            qty=float(position.qty),
+                            qty=abs(float(position.qty)),
                             side='buy',
                             type='limit',
                             time_in_force='day',
@@ -243,7 +243,7 @@ def order_v4(api):
                     try:
                         api.submit_order(
                             symbol=position.symbol,
-                            qty=float(position.qty),
+                            qty=abs(float(position.qty)),
                             side='sell',
                             type='limit',
                             time_in_force='day',
@@ -256,7 +256,7 @@ def order_v4(api):
                     try:
                         api.submit_order(
                             symbol=position.symbol,
-                            qty=float(position.qty),
+                            qty=abs(float(position.qty)),
                             side='buy',
                             type='limit',
                             time_in_force='day',

@@ -12,17 +12,17 @@ api = tradeapi.REST(
         profile.APCA_API_BASE_URL
     )
 
-prev_closes = gap.get_close()
+# prev_closes = gap.get_close()
 
 print(datetime.now() - start)
 start = datetime.now()
 
-tickers = gap.scan(api, prev_closes)
-print(tickers)
+# tickers = gap.scan(api, prev_closes)
+# print(tickers)
 # print(datetime.now() - start)
 # start = datetime.now()
 
-# gap.order(api, tickers)
+gap.order_v3(api)
 # telegram_bot.send_message("Order Finished")
 
 # get runtime
