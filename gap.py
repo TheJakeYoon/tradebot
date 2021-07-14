@@ -84,19 +84,19 @@ def scan(api, prev_closes):
 
     count = 0
     for ticker in tickers_down:
-        date = market_day.prev_open()
-        # check for news
-        url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(ticker['ticker'], date, profile.POLYGON_API_KEY)
-        response = requests.get(url).json()
+        # date = market_day.prev_open()
+        # # check for news
+        # url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(ticker['ticker'], date, profile.POLYGON_API_KEY)
+        # response = requests.get(url).json()
         # only pick 10 stocks
-        if count < 10:
-            if not response['results']:
+        if count < 20:
+            # if not response['results']:
                 # print("No news")
                 ticker['side'] = 'buy'
                 gappers.append(ticker)
                 count += 1
-            else:
-                pass
+            # else:
+            #     pass
                 # print("News released {}".format(tickers[i]['ticker']))
         else:
             break
@@ -104,20 +104,20 @@ def scan(api, prev_closes):
     # print(len(tickers_up))
     count = 0
     for ticker in tickers_up:
-        date = market_day.prev_open()
-        # check for news
-        url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(ticker['ticker'], date, profile.POLYGON_API_KEY)
-        response = requests.get(url).json()
+        # date = market_day.prev_open()
+        # # check for news
+        # url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(ticker['ticker'], date, profile.POLYGON_API_KEY)
+        # response = requests.get(url).json()
         # only pick 10 stocks
-        if count < 10:
-            if not response['results']:
+        if count < 20:
+            # if not response['results']:
                 # print("No news")
                 ticker['side'] = 'sell'
                 gappers.append(ticker)
                 count += 1
-            else:
-                # print("News released {}".format(tickers_up[i]['ticker']))
-                pass
+            # else:
+            #     # print("News released {}".format(tickers_up[i]['ticker']))
+            #     pass
         else:
             break
 
