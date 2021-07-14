@@ -39,7 +39,7 @@ def get_close():
             volume = df.loc[df['date'] == prev_day]['volume'].iloc[-1]
             close_price = df.loc[df['date'] == prev_day]['close'].iloc[-1]
             # only scans for stocks with higher than daily volume of 1 million.
-            if volume > 2000000 and close_price > 50:
+            if volume > 100000 and close_price > 5:
                 ticker = file.replace('./data/historical/polygon_daily/', '')
                 ticker = ticker.replace('.csv', '')
                 prev_closes.append({'ticker' : ticker, 'close_price' : close_price})
@@ -62,10 +62,10 @@ def scan(api, prev_closes):
     # print(df.info())
     # print(df)
         
-    df_down = df.loc[(df['pct'] > -2) & (df['pct'] < -0.5)].copy()
+    df_down = df[(df['pct'] > -2) & (df['pct'] < -0.5)].copy()
     df_down['side'] = 'buy'
     df_down.sort_values(by = 'pct', inplace = True, ascending = True)
-    df_up = df.loc[(df['pct'] > 0.5) & (df['pct'] < 2)].copy()
+    df_up = df[(df['pct'] > 0.5) & (df['pct'] < 2)].copy()
     df_up['side'] = 'sell'
     df_up.sort_values(by = 'pct', inplace = True, ascending = False)
     tickers_down = df_down.to_dict('records')
