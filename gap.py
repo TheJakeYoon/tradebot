@@ -49,7 +49,7 @@ def get_close():
             low_price = df.loc[df['date'] == prev_day]['low'].iloc[-1]
             high_price = df.loc[df['date'] == prev_day]['high'].iloc[-1]
             # only scans for stocks with higher than daily volume of 1 million.
-            if volume > 1000000 and close_price > 10:
+            if volume > 100000 and close_price > 1:
                 ticker = file.replace('./data/historical/polygon_daily/', '')
                 ticker = ticker.replace('.csv', '')
                 prev_closes.append({'ticker' : ticker, 'close_price' : close_price, 'prev_low' : low_price, 'prev_high' : high_price})

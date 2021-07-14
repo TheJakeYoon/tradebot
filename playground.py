@@ -1,33 +1,63 @@
 from datetime import datetime
 import alpaca_trade_api as tradeapi
-import pytz, requests, json, time
+from numpy import row_stack
+import pytz, requests, json, time, csv
 import pandas as pd
 import market_day, gap, profile, kakao, performance, telegram_bot
 
-start = datetime.now()
+from os import listdir
+from os.path import isfile, join
 
-api = tradeapi.REST(
-        profile.APCA_API_KEY_ID,
-        profile.APCA_API_SECRET_KEY,
-        profile.APCA_API_BASE_URL
-    )
+onlyfiles = [f for f in listdir("./data/backtest/polygon_daily") if isfile(join("./data/backtest/polygon_daily", f))]
 
-# prev_closes = gap.get_close()
+# start = datetime.now()
 
-print(datetime.now() - start)
-start = datetime.now()
+# api = tradeapi.REST(
+#         profile.APCA_API_KEY_ID,
+#         profile.APCA_API_SECRET_KEY,
+#         profile.APCA_API_BASE_URL
+#     )
 
-# tickers = gap.scan(api, prev_closes)
-# print(tickers)
+# # prev_closes = gap.get_close()
+
 # print(datetime.now() - start)
 # start = datetime.now()
 
-gap.order_v3(api)
+# # tickers = gap.scan(api, prev_closes)
+# # print(tickers)
+# # print(datetime.now() - start)
+# # start = datetime.now()
+
+# gap.order_v3(api)
 # telegram_bot.send_message("Order Finished")
 
 # get runtime
-print(datetime.now() - start)
+# print(datetime.now() - start)
 
 # df = pd.read_csv("./data/backtest/results/backtest_2.csv")
 # avg_pct = df['pct'].sum() / len(df.index)
 # print(avg_pct)
+
+print(len(onlyfiles))
+
+issuefiles = []
+issuecontents = []
+
+for file in onlyfiles:
+    with open("./data/backtest/polygon_daily/{}".format(file), "r") as csvfile:
+        row = next(csv.reader(csvfile))
+        if row[0] != "ticker":
+            issuefiles.append(file)
+            issuecontents.append(list(csv.reader(csvfile)))
+
+print(len(issuefiles))
+
+# cols = ["ticker", "date", "open", "high", "low", "close", "volume"]
+# i = 0
+# for file in issuefiles:
+#     with open("./data/backtest/polygon_daily/{}".format(file), "w", newline="") as csvfile:
+#         csvwriter = csv.writer(csvfile)
+#         csvwriter.writerow(cols)
+#         for row in issuecontents[i]:
+#             # print(row)
+#             csvwriter.writerow(row)

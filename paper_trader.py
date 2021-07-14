@@ -44,10 +44,10 @@ if __name__ == '__main__':
 
             print("Paper order finished Done!")
 
-            time.sleep(10)
+            time.sleep(30)
 
             #Place stop limit and take profit order
-            gap_test.order_v2(api)
+            gap_test.order_v2(api, tickers)
 
             while api.list_positions() is not None and market_time != "12:01":
                 time.sleep(10)
