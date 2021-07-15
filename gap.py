@@ -1,5 +1,5 @@
 import pandas as pd
-import requests, math, asyncio, aiohttp
+import math, asyncio, aiohttp
 import profile, market_day
 
 # asyncio method to get polyon data faster
@@ -34,6 +34,8 @@ def get_close():
     files = pd.read_csv('./data/tickers/assets_list.csv')['ticker'].tolist()
 
     prev_closes = []
+    prev_day = market_day.prev_open()
+    print(prev_day)
 
     for file in files:
         file = "./data/historical/polygon_daily/{}.csv".format(file)
@@ -43,13 +45,13 @@ def get_close():
             # print(file)
             pass
         try:
-            prev_day = market_day.prev_open()
-            volume = df.loc[df['date'] == prev_day]['volume'].iloc[-1]
-            close_price = df.loc[df['date'] == prev_day]['close'].iloc[-1]
-            low_price = df.loc[df['date'] == prev_day]['low'].iloc[-1]
-            high_price = df.loc[df['date'] == prev_day]['high'].iloc[-1]
+            df = df.loc[df['date'] == prev_day]
+            volume = df['volume'].iloc[-1]
+            close_price = df['close'].iloc[-1]
+            low_price = df['low'].iloc[-1]
+            high_price = df['high'].iloc[-1]
             # only scans for stocks with higher than daily volume of 1 million.
-            if volume > 100000 and close_price > 1:
+            if volume > 500000 and close_price > 10:
                 ticker = file.replace('./data/historical/polygon_daily/', '')
                 ticker = ticker.replace('.csv', '')
                 prev_closes.append({'ticker' : ticker, 'close_price' : close_price, 'prev_low' : low_price, 'prev_high' : high_price})
@@ -70,12 +72,12 @@ def scan(api, prev_closes):
     df = pd.DataFrame(gaps)
     # print(df.info())
     # print(df)
-    df = df.loc[(df['pct'] > -5) & (df['pct'] < -2)]
-    df_down = df.loc[df['prev_low'] < df['current_price']].copy()
+    df_down = df[(df['pct'] > -5) & (df['pct'] < -2)]
+    df_down = df_down[df_down['prev_low'] < df_down['current_price']]
     df_down.sort_values(by = 'pct', inplace = True, ascending = True)
-    df = pd.DataFrame(gaps)
-    df = df.loc[(df['pct'] > 2) & (df['pct'] < 5)]
-    df_up = df.loc[df['prev_high'] > df['current_price']].copy()
+    # df = pd.DataFrame(gaps)
+    df_up = df[(df['pct'] > 2) & (df['pct'] < 5)]
+    df_up = df_up[df_up['prev_high'] > df_up['current_price']]
     df_up.sort_values(by = 'pct', inplace = True, ascending = False)
     tickers_down = df_down.to_dict('records')
     tickers_up = df_up.to_dict('records')
@@ -89,7 +91,7 @@ def scan(api, prev_closes):
         # url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(ticker['ticker'], date, profile.POLYGON_API_KEY)
         # response = requests.get(url).json()
         # only pick 10 stocks
-        if count < 20:
+        if count < 10:
             # if not response['results']:
                 # print("No news")
                 ticker['side'] = 'buy'
@@ -109,7 +111,7 @@ def scan(api, prev_closes):
         # url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(ticker['ticker'], date, profile.POLYGON_API_KEY)
         # response = requests.get(url).json()
         # only pick 10 stocks
-        if count < 20:
+        if count < 10:
             # if not response['results']:
                 # print("No news")
                 ticker['side'] = 'sell'
@@ -132,13 +134,13 @@ def order(api, tickers):
     position_size = initial_cash / len(tickers)
 
     for ticker in tickers:
-
-        price = float(api.get_last_trade(ticker['ticker']).price)
+        # price = float(api.get_last_trade(ticker['ticker']).price)
+        price = ticker['current_price']
         limit_price = 0.0
         if ticker['side'] == 'buy':
-            limit_price = price * 1.005
+            limit_price = price * 1.01
         elif ticker['side'] == 'sell':
-            limit_price = price * 0.995
+            limit_price = price * 0.99
         qty = math.floor(position_size / price)
 
         if qty > 0:
@@ -162,37 +164,34 @@ def order_v2(api, tickers):
         positions = api.list_positions()
         if positions is not None:
             for position in positions:
-                pct = abs(df.loc[df['ticker'] == position.symbol]['pct'].iloc[-1])
-                if position.side == 'long':
-                    try:
-                        api.submit_order(
-                            symbol=position.symbol,
-                            qty=abs(float(position.qty)),
-                            side='sell',
-                            type='limit',
-                            time_in_force='day',
-                            order_class='oco',
-                            stop_loss={'stop_price': float(position.avg_entry_price) * (1 - (pct/100))},
-                            take_profit={'limit_price': float(position.avg_entry_price) * (1 + (pct/200))}
-                        )
-                        print("Profit/Loss Order Placed!")
-                    except Exception as e:
-                        print(e)
-                elif position.side == 'short':
-                    try:
-                        api.submit_order(
-                            symbol=position.symbol,
-                            qty=abs(float(position.qty)),
-                            side='buy',
-                            type='limit',
-                            time_in_force='day',
-                            order_class='oco',
-                            stop_loss={'stop_price': float(position.avg_entry_price) * (1 + (pct/100))},
-                            take_profit={'limit_price': float(position.avg_entry_price) * (1 + (pct/100))}
-                        )
-                        print("Profit/Loss Order Placed!")
-                    except Exception as e:
-                        print(e)
+                try:
+                    pct = abs(df[(df['ticker'] == position.symbol.upper())]['pct'].iloc[-1])
+                    if position.side == 'long':
+                            api.submit_order(
+                                symbol=position.symbol,
+                                qty=abs(float(position.qty)),
+                                side='sell',
+                                type='limit',
+                                time_in_force='day',
+                                order_class='oco',
+                                stop_loss={'stop_price': float(position.avg_entry_price) * (1 - (pct/100))},
+                                take_profit={'limit_price': float(position.avg_entry_price) * (1 + (pct/200))}
+                            )
+                            print("Profit/Loss Order Placed!")
+                    elif position.side == 'short':
+                            api.submit_order(
+                                symbol=position.symbol,
+                                qty=abs(float(position.qty)),
+                                side='buy',
+                                type='limit',
+                                time_in_force='day',
+                                order_class='oco',
+                                stop_loss={'stop_price': float(position.avg_entry_price) * (1 + (pct/100))},
+                                take_profit={'limit_price': float(position.avg_entry_price) * (1 + (pct/200))}
+                            )
+                            print("Profit/Loss Order Placed!")
+                except Exception as e:
+                    print(e)
         else:
             print("Orders not filled yet!")
 

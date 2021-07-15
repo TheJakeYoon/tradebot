@@ -12,11 +12,11 @@ onlyfiles = [f for f in listdir("./data/backtest/polygon_daily") if isfile(join(
 
 # start = datetime.now()
 
-# api = tradeapi.REST(
-#         profile.APCA_API_KEY_ID,
-#         profile.APCA_API_SECRET_KEY,
-#         profile.APCA_API_BASE_URL
-#     )
+api = tradeapi.REST(
+        profile.APCA_API_KEY_ID,
+        profile.APCA_API_SECRET_KEY,
+        profile.APCA_API_BASE_URL
+    )
 
 # # prev_closes = gap.get_close()
 
@@ -28,7 +28,7 @@ onlyfiles = [f for f in listdir("./data/backtest/polygon_daily") if isfile(join(
 # # print(datetime.now() - start)
 # # start = datetime.now()
 
-# gap.order_v3(api)
+gap.order_v3(api)
 # telegram_bot.send_message("Order Finished")
 
 # get runtime
@@ -38,26 +38,26 @@ onlyfiles = [f for f in listdir("./data/backtest/polygon_daily") if isfile(join(
 # avg_pct = df['pct'].sum() / len(df.index)
 # print(avg_pct)
 
-print(len(onlyfiles))
+# print(len(onlyfiles))
 
-issuefiles = []
-issuecontents = []
+# issuefiles = []
+# issuecontents = []
 
-for file in onlyfiles:
-    with open("./data/backtest/polygon_daily/{}".format(file), "r") as csvfile:
-        row = next(csv.reader(csvfile))
-        if row[0] != "ticker":
-            issuefiles.append(file)
-            issuecontents.append(list(csv.reader(csvfile)))
+# for file in onlyfiles:
+#     with open("./data/backtest/polygon_daily/{}".format(file), "r") as csvfile:
+#         row = next(csv.reader(csvfile))
+#         if row[0] != "ticker":
+#             issuefiles.append(file)
+#             issuecontents.append(list(csv.reader(csvfile)))
 
-print(len(issuefiles))
+# print(len(issuefiles))
 
-# cols = ["ticker", "date", "open", "high", "low", "close", "volume"]
-# i = 0
-# for file in issuefiles:
-#     with open("./data/backtest/polygon_daily/{}".format(file), "w", newline="") as csvfile:
-#         csvwriter = csv.writer(csvfile)
-#         csvwriter.writerow(cols)
-#         for row in issuecontents[i]:
-#             # print(row)
-#             csvwriter.writerow(row)
+# # cols = ["ticker", "date", "open", "high", "low", "close", "volume"]
+# # i = 0
+# # for file in issuefiles:
+# #     with open("./data/backtest/polygon_daily/{}".format(file), "w", newline="") as csvfile:
+# #         csvwriter = csv.writer(csvfile)
+# #         csvwriter.writerow(cols)
+# #         for row in issuecontents[i]:
+# #             # print(row)
+# #             csvwriter.writerow(row)

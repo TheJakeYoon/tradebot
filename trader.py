@@ -39,15 +39,20 @@ if __name__ == '__main__':
 
             print("Ordering now")
             gap.order(api, tickers)
-
+            gap.order_v2(api, tickers)
+            
+            print(tickers)
             print("Order finished Done!")
 
             telegram_bot.send_message("Order Finished!")
+            api.cancel_all_orders()
+            gap.order_v2(api, tickers)
 
-            time.sleep(30)
+            time.sleep(20)
+            api.cancel_all_orders()
+            gap.order_v2(api, tickers)
 
             #Place stop limit and take profit order
-            gap.order_v2(api, tickers)
 
             while api.list_positions() is not None and market_time != "12:01":
                 time.sleep(10)

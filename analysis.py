@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import market_day
+import statistics
 
 #Referenced from Udemy Algorithmic Trading
 
@@ -131,9 +132,50 @@ def get_half_fill_pct_vol(DF, min_pct, max_pct, volume):
         return -1
     return round(len(df_3.index) / len(df_1.index) * 100, 2)
 
+def get_worst_avg_pct(DF, min_pct, max_pct):
+    df = DF.copy()
+    df_1 = df[(df['gap'] < -min_pct) & (df['gap'] > -max_pct)]
+    df_2 = df[(df['gap'] < max_pct) & (df['gap'] > min_pct)]
+    df_1.append(df_2)
+    if len(df_1.index) == 0:
+        return -1
+    total = df_1['worst_pct'].sum()
+    pct = round(total/len(df_1.index), 2)
+    return pct
+
+def get_continued_pct(DF, min_pct, max_pct):
+    df = DF.copy()
+    df_1 = df[(df['gap'] < -min_pct) & (df['gap'] > -max_pct)]
+    df_2 = df[(df['gap'] < max_pct) & (df['gap'] > min_pct)]
+    df_1.append(df_2)
+    if len(df_1.index) == 0:
+        return -1
+    total = df_1['continued'].sum()
+    return round(total/len(df_1.index), 2)
+
+def get_full_fill_pct(DF, min_pct, max_pct):
+    df = DF.copy()
+    df_1 = df[(df['gap'] < -min_pct) & (df['gap'] > -max_pct)]
+    df_2 = df[(df['gap'] < max_pct) & (df['gap'] > min_pct)]
+    df_1.append(df_2)
+    if len(df_1.index) == 0:
+        return -1
+    total = df_1['full_fill'].sum()
+    return round(total/len(df_1.index), 2)
+
 if __name__ == '__main__':
     # df = pd.read_csv("./data/backtest/polygon_minute/2010-01-11/HI.csv")
     # graph_candlestick(df)
+
+    # date = "2010-01-05"
+    # df = pd.read_csv("./data/backtest/results/{}_analysis_1.csv".format(date))
+
+    # pct = get_continued_pct(df, 2, 5)
+    # print(pct)
+    # pct = get_worst_avg_pct(df, 2, 5)
+    # print(pct)
+    # pct = get_full_fill_pct(df, 2, 5)
+    # print(pct)
 
     dates = []
     today_pct = []
@@ -143,7 +185,7 @@ if __name__ == '__main__':
     half_pct_vol = []
 
     date = "2010-02-03"
-    while date != "2010-03-11":
+    while date != "2010-10-19":
         # print(date)
         dates.append(date)
         df = pd.read_csv("./data/backtest/results/{}_analysis.csv".format(date))
@@ -163,6 +205,11 @@ if __name__ == '__main__':
 
         date = market_day.next_open(date)
 
+    print("Avg Fill Pct", statistics.mean(today_pct))
+    print("Avg Fill Pct for 2-5%", statistics.mean(fill_pct))
+    print("Avg Fill Pct for 2-5% volume over 100k", statistics.mean(fill_pct_vol))
+    print("Avg Half Fill Pct for 2-5%", statistics.mean(half_pct))
+    print("Avg Half Fill Pct for 2-5% volume over 100k", statistics.mean(half_pct_vol))
 
     plt.plot(dates, today_pct, label="%")
     plt.plot(dates, fill_pct, label="Fill %")
