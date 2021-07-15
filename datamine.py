@@ -1,4 +1,4 @@
-import csv, requests, asyncio, aiohttp
+import csv, asyncio, aiohttp
 import profile, market_day
 import alpaca_trade_api as tradeapi
 from alpaca_trade_api import REST
@@ -63,39 +63,6 @@ def get_tickers_alpaca():
                 csvwriter.writerow(ticker)
         print("{} stocks stored in assets_list.csv".format(count))
 
-def get_tickers_polygon(date = market_day.prev_open()):
-    tickers = []
-
-    with open('./data/tickers/polygon_list.csv', 'w') as csvfile:
-        csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(['ticker', 'name', 'locale', 'exchange'])
-        url = "https://api.polygon.io/v3/reference/tickers?date={}&active=true&sort=ticker&order=asc&limit=1000&apiKey={}".format(date, profile.POLYGON_API_KEY)
-        response = requests.get(url).json()
-        while 'next_url' in response:
-            #print(response['next_url'])
-            for ticker in response['results']:
-                if 'locale' in ticker and '.' not in ticker['ticker'] and len(ticker['ticker']) < 5:
-                    csvwriter.writerow([ticker['ticker'], ticker['name'], ticker['locale'], ticker['primary_exchange']])
-            response = requests.get(response['next_url'] + "&apiKey=" + profile.POLYGON_API_KEY).json()
-    return tickers
-
-def get_less_tickers_polygon():
-    tickers = []
-
-    df = pd.read_csv('./data/tickers/polygon_list.csv')
-
-    df1 = df[df['exchange'].str.match('XNAS')]
-    df2 = df[df['exchange'].str.match('XNYS')]
-
-    df = df1.append(df2)
-
-    df = df[~df['name'].str.contains('ETF')]
-    df.reset_index(drop = True, inplace = True)
-    print(df.info())
-    #print(df)
-
-    df.to_csv('./data/tickers/smaller_polygon_list.csv', index = False)
-
 def get_open_close(date = market_day.prev_open()):
     print("Getting Daily Open Close {}".format(date))
     datas = asyncio.run(scan(date))
@@ -110,5 +77,6 @@ if __name__ == '__main__':
     print("Let's get some data!")
     # run this if trader.py was not terminated correctly.
     start = datetime.now()
+    get_tickers_alpaca()
     get_open_close()
     print(datetime.now() - start)

@@ -65,7 +65,7 @@ def today(api):
 
     with open('./performance/alpaca.csv', 'a') as csvfile:
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow([date, float(account.equity) - 10000, balance_change, pct])
+        csvwriter.writerow([date, round(float(account.equity), 2) - 10000, balance_change, pct])
 
     telegram_bot.send_message("Equity : ${}".format(round(float(account.equity), 2)))
 

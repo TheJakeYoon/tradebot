@@ -1,6 +1,7 @@
 import alpaca_trade_api as tradeapi
 import time
 import gap, profile, market_day, datamine, telegram_bot, performance
+import pandas as pd
 
 #TRADE BOT
 if __name__ == '__main__':
@@ -39,25 +40,21 @@ if __name__ == '__main__':
 
             print("Ordering now")
             gap.order(api, tickers)
+            #Place stop limit and take profit order
             gap.order_v2(api, tickers)
             
             print("Order finished Done!")
-            print(tickers)
 
             telegram_bot.send_message("Order Finished!")
-            api.cancel_all_orders()
-            gap.order_v2(api, tickers)
 
-            time.sleep(20)
-            api.cancel_all_orders()
-            gap.order_v2(api, tickers)
-
-            #Place stop limit and take profit order
+            df = pd.DataFrame(tickers)
+            date = market_day.today()
+            df.to_csv("./orders/{}.csv".format(date))
 
             while api.list_positions() is not None and market_time != "12:01":
                 time.sleep(10)
                 market_time = market_day.now()
-                if market_time == "12:00":
+                if market_time == "12:01":
                     pass
                     #Strategy specific!!!!!!
                     api.cancel_all_orders()
@@ -85,7 +82,6 @@ if __name__ == '__main__':
                 market_time = market_day.now()
 
             #get daily open close from Polygon.io
-            date = market_day.today()
             datamine.get_open_close(date)
             telegram_bot.send_message("Stored daily open/close from Polyon.io {}".format(date))
 
