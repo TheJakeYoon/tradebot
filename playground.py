@@ -3,10 +3,7 @@ import alpaca_trade_api as tradeapi
 from numpy import row_stack
 import pytz, requests, json, time, csv
 import pandas as pd
-import market_day, gap, profile, kakao, performance, telegram_bot
-
-from os import listdir
-from os.path import isfile, join
+import market_day, gap, profile, performance, telegram_bot
 
 start = datetime.now()
 
