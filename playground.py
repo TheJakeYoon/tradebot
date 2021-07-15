@@ -8,9 +8,7 @@ import market_day, gap, profile, kakao, performance, telegram_bot
 from os import listdir
 from os.path import isfile, join
 
-onlyfiles = [f for f in listdir("./data/backtest/polygon_daily") if isfile(join("./data/backtest/polygon_daily", f))]
-
-# start = datetime.now()
+start = datetime.now()
 
 api = tradeapi.REST(
         profile.APCA_API_KEY_ID,
@@ -18,21 +16,22 @@ api = tradeapi.REST(
         profile.APCA_API_BASE_URL
     )
 
-# # prev_closes = gap.get_close()
+prev_closes = gap.get_close()
 
-# print(datetime.now() - start)
-# start = datetime.now()
+print(datetime.now() - start)
+start = datetime.now()
 
-# # tickers = gap.scan(api, prev_closes)
-# # print(tickers)
-# # print(datetime.now() - start)
-# # start = datetime.now()
+tickers = gap.scan(api, prev_closes)
+print(tickers)
+print(datetime.now() - start)
+start = datetime.now()
 
-gap.order_v3(api)
+gap.order(api, tickers)
+gap.order_v2(api, tickers)
 # telegram_bot.send_message("Order Finished")
 
 # get runtime
-# print(datetime.now() - start)
+print(datetime.now() - start)
 
 # df = pd.read_csv("./data/backtest/results/backtest_2.csv")
 # avg_pct = df['pct'].sum() / len(df.index)

@@ -41,8 +41,8 @@ if __name__ == '__main__':
             gap.order(api, tickers)
             gap.order_v2(api, tickers)
             
-            print(tickers)
             print("Order finished Done!")
+            print(tickers)
 
             telegram_bot.send_message("Order Finished!")
             api.cancel_all_orders()

@@ -2,7 +2,9 @@ import pandas as pd
 import math, asyncio, aiohttp
 import profile, market_day
 
-# asyncio method to get polyon data faster
+# asyncio methods to get polyon data faster
+
+# gets the last traded price of a ticker
 async def get_APIdata(session, url, prev_close, gap):
     async with session.get(url) as response:
         try:
@@ -17,7 +19,7 @@ async def get_APIdata(session, url, prev_close, gap):
             #print(url)
             pass
 
-# gets previous day's close and calls get_APIdata()
+# gets last traded prices for all tickers
 async def get_gap(prev_closes):
     gap = []
     async with aiohttp.ClientSession() as session:
@@ -27,15 +29,15 @@ async def get_gap(prev_closes):
             task = asyncio.ensure_future(get_APIdata(session, url, prev_close, gap))
             tasks.append(task)
         await asyncio.gather(*tasks)
-
     return gap
 
+# gets previous market day's closing price
 def get_close():
     files = pd.read_csv('./data/tickers/assets_list.csv')['ticker'].tolist()
 
     prev_closes = []
     prev_day = market_day.prev_open()
-    print(prev_day)
+    print("Getting {}'s Close".format(prev_day))
 
     for file in files:
         file = "./data/historical/polygon_daily/{}.csv".format(file)
@@ -59,13 +61,10 @@ def get_close():
             # print(e)
             # print("Make sure to get previous open close")
             pass
-
     return prev_closes
 
 # Scans for stocks
-# If S&P is up, looks for gap downs
-# If S&P is down, looks for gap ups
-# 2-8% change and no news
+# 2-5% change
 def scan(api, prev_closes):
     gaps = asyncio.run(get_gap(prev_closes))
 
@@ -127,10 +126,9 @@ def scan(api, prev_closes):
     return gappers
 
 def order(api, tickers):
-
-    account = api.get_account()
-    initial_cash = float(account.buying_power)
-    initial_cash = 20000
+    # account = api.get_account()
+    # initial_cash = float(account.buying_power)
+    initial_cash = 2000
     position_size = initial_cash / len(tickers)
 
     for ticker in tickers:
@@ -187,7 +185,7 @@ def order_v2(api, tickers):
                                 time_in_force='day',
                                 order_class='oco',
                                 stop_loss={'stop_price': float(position.avg_entry_price) * (1 + (pct/100))},
-                                take_profit={'limit_price': float(position.avg_entry_price) * (1 + (pct/200))}
+                                take_profit={'limit_price': float(position.avg_entry_price) * (1 - (pct/200))}
                             )
                             print("Profit/Loss Order Placed!")
                 except Exception as e:
