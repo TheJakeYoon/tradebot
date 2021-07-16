@@ -126,20 +126,26 @@ def scan(api, prev_closes):
     return gappers
 
 def order(api, tickers):
-    # account = api.get_account()
-    # initial_cash = float(account.buying_power)
-    initial_cash = 2000
+    initial_cash = 20000
     position_size = initial_cash / len(tickers)
 
     for ticker in tickers:
         # price = float(api.get_last_trade(ticker['ticker']).price)
         price = ticker['current_price']
+        pct = abs(ticker['pct'])
         limit_price = 0.0
         if ticker['side'] == 'buy':
             limit_price = price * 1.01
+            stop_price = price * (1 - (pct/120))
+            stop_limit_price = price * (1 - (pct/100))
+            profit_limit_price = price * (1 + (pct/200))
         elif ticker['side'] == 'sell':
             limit_price = price * 0.99
+            stop_price = price * (1 + (pct/120))
+            stop_limit_price = price * (1 + (pct/100))
+            profit_limit_price = price * (1 - (pct/200))
         qty = math.floor(position_size / price)
+
 
         if qty > 0:
             try:
@@ -150,6 +156,9 @@ def order(api, tickers):
                 type='limit',
                 limit_price=limit_price,
                 time_in_force='day',
+                order_class='bracket',
+                stop_loss={'stop_price': stop_price, 'limit_price': stop_limit_price},
+                take_profit={'limit_price': profit_limit_price}
                 )
                 print("Order Placed!")
             except Exception as e:

@@ -41,7 +41,7 @@ if __name__ == '__main__':
             print("Ordering now")
             gap.order(api, tickers)
             #Place stop limit and take profit order
-            gap.order_v2(api, tickers)
+            # gap.order_v2(api, tickers)
             
             print("Order finished Done!")
 
