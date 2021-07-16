@@ -135,12 +135,12 @@ def order(api, tickers):
         pct = abs(ticker['pct'])
         limit_price = 0.0
         if ticker['side'] == 'buy':
-            limit_price = price * 1.01
+            limit_price = price * 1.005
             stop_price = price * (1 - (pct/120))
             stop_limit_price = price * (1 - (pct/100))
             profit_limit_price = price * (1 + (pct/200))
         elif ticker['side'] == 'sell':
-            limit_price = price * 0.99
+            limit_price = price * 0.995
             stop_price = price * (1 + (pct/120))
             stop_limit_price = price * (1 + (pct/100))
             profit_limit_price = price * (1 - (pct/200))
