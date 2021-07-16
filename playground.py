@@ -1,6 +1,5 @@
 from datetime import datetime
 import alpaca_trade_api as tradeapi
-from numpy import row_stack
 import pytz, requests, json, time, csv
 import pandas as pd
 import market_day, gap, profile, performance, telegram_bot
@@ -8,9 +7,9 @@ import market_day, gap, profile, performance, telegram_bot
 start = datetime.now()
 
 api = tradeapi.REST(
-        profile.APCA_API_KEY_ID,
-        profile.APCA_API_SECRET_KEY,
-        profile.APCA_API_BASE_URL
+        profile.APCA_API_PAPER_KEY_ID,
+        profile.APCA_API_PAPER_SECRET_KEY,
+        profile.APCA_API_PAPER_BASE_URL
     )
 
 prev_closes = gap.get_close()
@@ -19,14 +18,13 @@ print(datetime.now() - start)
 start = datetime.now()
 
 tickers = gap.scan(api, prev_closes)
-print(tickers)
+print("tickers retrieved")
 print(datetime.now() - start)
 start = datetime.now()
 
 gap.order(api, tickers)
 gap.order_v2(api, tickers)
 # telegram_bot.send_message("Order Finished")
-
 # get runtime
 print(datetime.now() - start)
 
