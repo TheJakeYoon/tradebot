@@ -85,6 +85,9 @@ if __name__ == '__main__':
         profile.APCA_API_BASE_URL
     )
 
-    #Saves daily performance        
-    summary(api)
+    #Saves daily performance
+    try: 
+        summary(api)
+    except Exception as e:
+        print(e)
     today(api)

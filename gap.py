@@ -146,7 +146,6 @@ def order(api, tickers):
             profit_limit_price = price * (1 - (pct/200))
         qty = math.floor(position_size / price)
 
-
         if qty > 0:
             try:
                 api.submit_order(

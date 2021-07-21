@@ -29,6 +29,7 @@ if __name__ == '__main__':
             print(market_day.now())
 
         prev_closes = gap.get_close()
+        print("Total Prev Closes: {}".format(len(prev_closes)))
 
         market_time = market_day.now()
         while market_time != "09:30":
@@ -81,8 +82,11 @@ if __name__ == '__main__':
                 time.sleep(10)
                 market_time = market_day.now()
 
+            time.sleep(300)
+
             #get daily open close from Polygon.io
-            datamine.get_open_close(date)
+            datamine.get_tickers_alpaca()
+            datamine.get_open_close()
             telegram_bot.send_message("Stored daily open/close from Polyon.io {}".format(date))
 
             #Saves daily performance
