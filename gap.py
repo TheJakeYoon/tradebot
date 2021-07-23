@@ -32,11 +32,10 @@ async def get_gap(prev_closes):
     return gap
 
 # gets previous market day's closing price
-def get_close():
+def get_close(prev_day = market_day.prev_open()):
     files = pd.read_csv('./data/tickers/assets_list.csv')['ticker'].tolist()
 
     prev_closes = []
-    prev_day = market_day.prev_open()
     print("Getting {}'s Close".format(prev_day))
 
     for file in files:

@@ -20,8 +20,8 @@ async def get_APIdata(session, url, datas):
             }
             datas.append(data)
         except Exception as e:
-            print(e)
-            print(url)
+            # print(e)
+            # print(url)
             pass
 
 async def scan(date):

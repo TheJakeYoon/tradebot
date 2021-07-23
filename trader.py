@@ -19,6 +19,9 @@ if __name__ == '__main__':
     # run forever!
     while True:
         print("Trading Bot Started!")
+        today = market_day.today()
+        prev_day = market_day.prev_open(today)
+        print(today)
         print(market_day.now())
 
         if api.get_clock().is_open:
@@ -28,7 +31,7 @@ if __name__ == '__main__':
             print("Market Closed")
             print(market_day.now())
 
-        prev_closes = gap.get_close()
+        prev_closes = gap.get_close(prev_day)
         print("Total Prev Closes: {}".format(len(prev_closes)))
 
         market_time = market_day.now()
@@ -49,8 +52,7 @@ if __name__ == '__main__':
             telegram_bot.send_message("Order Finished!")
 
             df = pd.DataFrame(tickers)
-            date = market_day.today()
-            df.to_csv("./orders/{}.csv".format(date))
+            df.to_csv("./orders/{}.csv".format(today))
 
             while api.list_positions() is not None and market_time != "12:01":
                 time.sleep(10)
@@ -86,7 +88,7 @@ if __name__ == '__main__':
 
             #get daily open close from Polygon.io
             datamine.get_tickers_alpaca()
-            datamine.get_open_close()
+            datamine.get_open_close(today)
             telegram_bot.send_message("Stored daily open/close from Polyon.io {}".format(date))
 
             #Saves daily performance
