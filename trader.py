@@ -89,7 +89,7 @@ if __name__ == '__main__':
             #get daily open close from Polygon.io
             datamine.get_tickers_alpaca()
             datamine.get_open_close(today)
-            telegram_bot.send_message("Stored daily open/close from Polyon.io {}".format(date))
+            telegram_bot.send_message("Stored daily open/close from Polyon.io {}".format(today))
 
             #Saves daily performance
             try:        
