@@ -97,3 +97,8 @@ if __name__ == '__main__':
             except Exception as e:
                 print(e)
             performance.today(api)
+        else:
+            while market_time != "23:59":
+                time.sleep(10)
+                market_time = market_day.now()
+        time.sleep(60)

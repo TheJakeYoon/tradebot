@@ -57,11 +57,11 @@ def today(api):
     
     date = market_day.today()
 
-    equity = 20000
+    equity = 10000
     balance_change = float(account.equity) - float(account.last_equity)
     balance_change = round(balance_change, 2)
 
-    pct = round((balance_change / 20000) * 100, 2)
+    pct = round((balance_change / equity) * 100, 2)
 
     with open('./performance/alpaca.csv', 'a') as csvfile:
         csvwriter = csv.writer(csvfile)

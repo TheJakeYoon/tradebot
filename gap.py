@@ -125,7 +125,7 @@ def scan(api, prev_closes):
     return gappers
 
 def order(api, tickers):
-    initial_cash = 20000
+    initial_cash = 10000
     position_size = initial_cash / len(tickers)
 
     for ticker in tickers:
