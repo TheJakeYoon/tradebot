@@ -52,7 +52,7 @@ def get_close(prev_day = market_day.prev_open()):
             low_price = df['low'].iloc[-1]
             high_price = df['high'].iloc[-1]
             # only scans for stocks with higher than daily volume of 1 million.
-            if volume > 500000 and close_price > 10:
+            if volume > 10000 and close_price > 10:
                 ticker = file.replace('./data/historical/polygon_daily/', '')
                 ticker = ticker.replace('.csv', '')
                 prev_closes.append({'ticker' : ticker, 'close_price' : close_price, 'prev_low' : low_price, 'prev_high' : high_price})
@@ -70,11 +70,11 @@ def scan(api, prev_closes):
     df = pd.DataFrame(gaps)
     # print(df.info())
     # print(df)
-    df_down = df[(df['pct'] > -5) & (df['pct'] < -2)]
+    df_down = df[(df['pct'] > -3) & (df['pct'] < -2)]
     df_down = df_down[df_down['prev_low'] < df_down['current_price']]
     df_down.sort_values(by = 'pct', inplace = True, ascending = True)
     # df = pd.DataFrame(gaps)
-    df_up = df[(df['pct'] > 2) & (df['pct'] < 5)]
+    df_up = df[(df['pct'] > 2) & (df['pct'] < 3)]
     df_up = df_up[df_up['prev_high'] > df_up['current_price']]
     df_up.sort_values(by = 'pct', inplace = True, ascending = False)
     tickers_down = df_down.to_dict('records')
@@ -135,13 +135,13 @@ def order(api, tickers):
         limit_price = 0.0
         if ticker['side'] == 'buy':
             limit_price = price * 1.005
-            stop_price = price * (1 - (pct/120))
-            stop_limit_price = price * (1 - (pct/100))
+            stop_price = price * (1 - (pct/250))
+            stop_limit_price = price * (1 - (pct/200))
             profit_limit_price = price * (1 + (pct/200))
         elif ticker['side'] == 'sell':
             limit_price = price * 0.995
-            stop_price = price * (1 + (pct/120))
-            stop_limit_price = price * (1 + (pct/100))
+            stop_price = price * (1 + (pct/250))
+            stop_limit_price = price * (1 + (pct/200))
             profit_limit_price = price * (1 - (pct/200))
         qty = math.floor(position_size / price)
 
