@@ -70,11 +70,11 @@ def scan(api, prev_closes):
     df = pd.DataFrame(gaps)
     # print(df.info())
     # print(df)
-    df_down = df[(df['pct'] > -3) & (df['pct'] < -2)]
+    df_down = df[(df['pct'] > -4) & (df['pct'] < -2)]
     df_down = df_down[df_down['prev_low'] < df_down['current_price']]
     df_down.sort_values(by = 'pct', inplace = True, ascending = True)
     # df = pd.DataFrame(gaps)
-    df_up = df[(df['pct'] > 2) & (df['pct'] < 3)]
+    df_up = df[(df['pct'] > 2) & (df['pct'] < 4)]
     df_up = df_up[df_up['prev_high'] > df_up['current_price']]
     df_up.sort_values(by = 'pct', inplace = True, ascending = False)
     tickers_down = df_down.to_dict('records')
@@ -89,7 +89,7 @@ def scan(api, prev_closes):
         # url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(ticker['ticker'], date, profile.POLYGON_API_KEY)
         # response = requests.get(url).json()
         # only pick 10 stocks
-        if count < 10:
+        if count < 20:
             # if not response['results']:
                 # print("No news")
                 ticker['side'] = 'buy'
@@ -109,7 +109,7 @@ def scan(api, prev_closes):
         # url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(ticker['ticker'], date, profile.POLYGON_API_KEY)
         # response = requests.get(url).json()
         # only pick 10 stocks
-        if count < 10:
+        if count < 20:
             # if not response['results']:
                 # print("No news")
                 ticker['side'] = 'sell'
