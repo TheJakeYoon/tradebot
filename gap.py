@@ -133,14 +133,14 @@ def order(api, tickers):
         limit_price = 0.0
         if ticker['side'] == 'buy':
             limit_price = price * 1.005
-            stop_price = price * (1 - (pct/250))
-            stop_limit_price = price * (1 - (pct/200))
-            profit_limit_price = price * (1 + (pct/200))
+            stop_price = price * (1 - (pct/400))
+            stop_limit_price = price * (1 - (pct/300))
+            profit_limit_price = price * (1 + (pct/100))
         elif ticker['side'] == 'sell':
             limit_price = price * 0.995
-            stop_price = price * (1 + (pct/250))
-            stop_limit_price = price * (1 + (pct/200))
-            profit_limit_price = price * (1 - (pct/200))
+            stop_price = price * (1 + (pct/400))
+            stop_limit_price = price * (1 + (pct/300))
+            profit_limit_price = price * (1 - (pct/100))
         qty = math.floor(position_size / price)
 
         if qty > 0:
