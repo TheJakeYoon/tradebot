@@ -2,8 +2,6 @@ import pandas as pd
 import math, asyncio, aiohttp
 import profile, market_day
 
-# asyncio methods to get polyon data faster
-
 # gets the last traded price of a ticker
 async def get_APIdata(session, url, prev_close, gap):
     async with session.get(url) as response:
@@ -51,8 +49,8 @@ def get_close(prev_day = market_day.prev_open()):
             close_price = df['close'].iloc[-1]
             low_price = df['low'].iloc[-1]
             high_price = df['high'].iloc[-1]
-            # only scans for stocks with higher than daily volume of 1 million.
-            if volume > 500000 and close_price > 10:
+            # only scans for stocks with higher than daily volume of 500000.
+            if volume > 500000 and close_price > 5:
                 ticker = file.replace('./data/historical/polygon_daily/', '')
                 ticker = ticker.replace('.csv', '')
                 prev_closes.append({'ticker' : ticker, 'close_price' : close_price, 'prev_low' : low_price, 'prev_high' : high_price})
