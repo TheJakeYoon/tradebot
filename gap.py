@@ -50,7 +50,7 @@ def get_close(prev_day = market_day.prev_open()):
             low_price = df['low'].iloc[-1]
             high_price = df['high'].iloc[-1]
             # only scans for stocks with higher than daily volume of 500000.
-            if volume > 500000 and close_price > 5:
+            if volume > 500000 and close_price > 10:
                 ticker = file.replace('./data/historical/polygon_daily/', '')
                 ticker = ticker.replace('.csv', '')
                 prev_closes.append({'ticker' : ticker, 'close_price' : close_price, 'prev_low' : low_price, 'prev_high' : high_price})
@@ -68,11 +68,11 @@ def scan(api, prev_closes):
     df = pd.DataFrame(gaps)
     # print(df.info())
     # print(df)
-    df_down = df[(df['pct'] > -4) & (df['pct'] < -2)]
+    df_down = df[(df['pct'] > -5) & (df['pct'] < -2)]
     df_down = df_down[df_down['prev_low'] < df_down['current_price']]
     df_down.sort_values(by = 'pct', inplace = True, ascending = True)
     # df = pd.DataFrame(gaps)
-    df_up = df[(df['pct'] > 2) & (df['pct'] < 4)]
+    df_up = df[(df['pct'] > 2) & (df['pct'] < 5)]
     df_up = df_up[df_up['prev_high'] > df_up['current_price']]
     df_up.sort_values(by = 'pct', inplace = True, ascending = False)
     tickers_down = df_down.to_dict('records')
@@ -87,7 +87,7 @@ def scan(api, prev_closes):
         # url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(ticker['ticker'], date, profile.POLYGON_API_KEY)
         # response = requests.get(url).json()
         # only pick 10 stocks
-        if count < 20:
+        if count < 10:
             # if not response['results']:
                 # print("No news")
                 ticker['side'] = 'buy'
@@ -107,7 +107,7 @@ def scan(api, prev_closes):
         # url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(ticker['ticker'], date, profile.POLYGON_API_KEY)
         # response = requests.get(url).json()
         # only pick 10 stocks
-        if count < 20:
+        if count < 10:
             # if not response['results']:
                 # print("No news")
                 ticker['side'] = 'sell'
@@ -133,14 +133,14 @@ def order(api, tickers):
         limit_price = 0.0
         if ticker['side'] == 'buy':
             limit_price = price * 1.005
-            stop_price = price * (1 - (pct/400))
-            stop_limit_price = price * (1 - (pct/300))
-            profit_limit_price = price * (1 + (pct/125))
+            stop_price = price * (1 - ((pct/100) * 0.1))
+            stop_limit_price = price * (1 - ((pct/100) * 0.4))
+            profit_limit_price = price * (1 + ((pct/100) * 0.9))
         elif ticker['side'] == 'sell':
             limit_price = price * 0.995
-            stop_price = price * (1 + (pct/400))
-            stop_limit_price = price * (1 + (pct/300))
-            profit_limit_price = price * (1 - (pct/125))
+            stop_price = price * (1 + ((pct/100) * 0.1))
+            stop_limit_price = price * (1 + ((pct/100) * 0.4))
+            profit_limit_price = price * (1 - ((pct/100) * 0.9))
         qty = math.floor(position_size / price)
 
         if qty > 0:
