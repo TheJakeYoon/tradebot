@@ -87,7 +87,7 @@ def scan(api, prev_closes):
         # url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(ticker['ticker'], date, profile.POLYGON_API_KEY)
         # response = requests.get(url).json()
         # only pick 10 stocks
-        if count < 10:
+        if count < 20:
             # if not response['results']:
                 # print("No news")
                 ticker['side'] = 'buy'
@@ -107,7 +107,7 @@ def scan(api, prev_closes):
         # url = "https://api.polygon.io/v2/reference/news?limit=3&order=descending&sort=published_utc&ticker={}&published_utc.gte={}&apiKey={}".format(ticker['ticker'], date, profile.POLYGON_API_KEY)
         # response = requests.get(url).json()
         # only pick 10 stocks
-        if count < 10:
+        if count < 20:
             # if not response['results']:
                 # print("No news")
                 ticker['side'] = 'sell'
@@ -123,7 +123,7 @@ def scan(api, prev_closes):
     return gappers
 
 def order(api, tickers):
-    initial_cash = 10000
+    initial_cash = 50000
     position_size = initial_cash / len(tickers)
 
     for ticker in tickers:
